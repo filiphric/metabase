@@ -7,7 +7,7 @@ PLUGIN_ADMIN_SETTINGS_UPDATES.push(sections =>
   updateIn(sections, ["authentication", "settings"], settings => [
     ...settings,
     {
-      key: "api-keys-enabled",
+      key: "api-keys",
       description: null,
       noHeader: true,
       widget: ApiKeysAuthCard,
