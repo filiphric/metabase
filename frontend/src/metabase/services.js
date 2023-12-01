@@ -600,3 +600,7 @@ export const MetabotApi = {
   databasePromptQuery: POST("/api/metabot/database/:databaseId/query"),
   sendFeedback: POST("/api/metabot/feedback"),
 };
+
+export const ApiKeysApi = {
+  count: GET("/api/api-keys/count"),
+};

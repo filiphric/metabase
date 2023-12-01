@@ -1,6 +1,8 @@
 import { t } from "ttag";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import Button from "metabase/core/components/Button";
+import { ApiKeysApi } from "metabase/services";
 import {
   CardBadge,
   CardDescription,
@@ -10,15 +12,20 @@ import {
 } from "./AuthCard/AuthCard.styled";
 
 export const ApiKeysAuthCard = () => {
-  const count = 0; // TODO: use selector to get number of API keys
-  const isConfigured = count > 0;
+  const [keyCount, setKeyCount] = useState(0);
+
+  useEffect(() => {
+    ApiKeysApi.count().then(setKeyCount);
+  }, []);
+
+  const isConfigured = keyCount > 0;
   return (
     <CardRoot>
       <CardHeader>
         <CardTitle>{t`API Keys`}</CardTitle>
         {isConfigured && (
           <CardBadge isEnabled>
-            {count === 1 ? t`1 API Key` : t`${count} API Keys`}
+            {keyCount === 1 ? t`1 API Key` : t`${keyCount} API Keys`}
           </CardBadge>
         )}
       </CardHeader>
