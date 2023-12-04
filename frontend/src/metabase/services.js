@@ -602,5 +602,6 @@ export const MetabotApi = {
 };
 
 export const ApiKeysApi = {
+  list: GET("/api/api-keys"),
   count: GET("/api/api-keys/count"),
 };
