@@ -41,7 +41,7 @@ export const ApiKeysList = () => {
           [t`API Keys`],
         ]}
       />
-      <Group align="end">
+      <Group align="end" position="apart">
         <Stack>
           <h2>{t`Manage API Keys`}</h2>
           <p>{t`Allow users to use the API keys to authenticate their API calls.`}</p>
