@@ -8,34 +8,30 @@ import { ApiKeysApi } from "metabase/services";
 import { Icon } from "metabase/core/components/Icon";
 import { Form, FormProvider } from "metabase/forms";
 
-export const CreateApiKeyModal = ({ handleClose }) => {
+export const CreateApiKeyModal = ({ onClose }) => {
   return (
     <Modal
       padding="xl"
       opened
-      onClose={handleClose}
+      onClose={onClose}
       title={t`Create a new API Key`}
     />
   );
 };
 
-export const EditApiKeyModal = ({ handleClose }) => {
+export const EditApiKeyModal = ({ onClose }) => {
   return (
-    <Modal padding="xl" opened onClose={handleClose} title={t`Edit API Key`} />
+    <Modal padding="xl" opened onClose={onClose} title={t`Edit API Key`} />
   );
 };
 
-export const DeleteApiKeyModal = ({
-  handleClose,
-  handleRefresh,
-  activeRow,
-}) => {
+export const DeleteApiKeyModal = ({ onClose, refreshList, activeRow }) => {
   return (
     <Modal
       size="30rem"
       padding="xl"
       opened
-      onClose={handleClose}
+      onClose={onClose}
       title={t`Delete API Key`}
     >
       <Stack>
@@ -43,15 +39,15 @@ export const DeleteApiKeyModal = ({
         <Group position="right">
           <Button
             color="error.0"
-            onClick={handleClose}
+            onClick={onClose}
           >{t`No, don’t delete`}</Button>
           <Button
             variant="filled"
             color="error.0"
             onClick={async () => {
               await ApiKeysApi.delete({ id: activeRow.id });
-              handleClose();
-              handleRefresh();
+              onClose();
+              refreshList();
             }}
           >{t`Delete API Key`}</Button>
         </Group>
@@ -85,7 +81,7 @@ export const ApiKeysList = () => {
   const [keyRows, setKeyRows] = useState([]);
   const [modal, setModal] = useState<"create" | "edit" | "delete" | null>(null);
   const [activeRow, setActiveRow] = useState(null);
-  const handleRefresh = () => ApiKeysApi.list().then(setKeyRows);
+  const refreshList = () => ApiKeysApi.list().then(setKeyRows);
   const handleClose = () => setModal(null);
 
   useEffect(() => {
@@ -97,14 +93,14 @@ export const ApiKeysList = () => {
   return (
     <>
       {modal === "create" ? (
-        <CreateApiKeyModal handleClose={handleClose} />
+        <CreateApiKeyModal onClose={handleClose} />
       ) : modal === "edit" ? (
-        <EditApiKeyModal handleClose={handleClose} />
+        <EditApiKeyModal onClose={handleClose} />
       ) : modal === "delete" ? (
         <DeleteApiKeyModal
           activeRow={activeRow}
-          handleRefresh={handleRefresh}
-          handleClose={handleClose}
+          refreshList={refreshList}
+          onClose={handleClose}
         />
       ) : null}
       <Stack pl="md">
