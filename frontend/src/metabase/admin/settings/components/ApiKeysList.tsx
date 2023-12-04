@@ -13,7 +13,7 @@ export const ApiKeysList = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [activeId, setActiveId] = useState(null);
+  const [activeRow, setActiveRow] = useState(null);
 
   useEffect(() => {
     // :name, :group_id, :created_at, :updated_at, and :masked_key
@@ -72,7 +72,7 @@ export const ApiKeysList = () => {
               variant="filled"
               color="error.0"
               onClick={async () => {
-                await ApiKeysApi.delete({ id: activeId });
+                await ApiKeysApi.delete({ id: activeRow.id });
                 setIsDeleting(false);
                 ApiKeysApi.list().then(setKeyRows);
               }}
@@ -110,42 +110,32 @@ export const ApiKeysList = () => {
             </tr>
           </thead>
           <tbody>
-            {keyRows.map(
-              ({
-                name,
-                id,
-                group_id,
-                creator_id,
-                masked_key,
-                created_at,
-                updated_at,
-              }) => (
-                <tr key={id} className="border-bottom">
-                  <td className="text-bold">{name}</td>
-                  <td>{group_id}</td>
-                  <td>{masked_key}</td>
-                  <td>{creator_id}</td>
-                  <td>{updated_at}</td>
-                  <td>
-                    <Group spacing="md">
-                      <Icon
-                        name="pencil"
-                        onClick={() => setIsEditing(true)}
-                        className="cursor-pointer"
-                      />
-                      <Icon
-                        name="trash"
-                        onClick={() => {
-                          setIsDeleting(true);
-                          setActiveId(id);
-                        }}
-                        className="cursor-pointer"
-                      />
-                    </Group>
-                  </td>
-                </tr>
-              ),
-            )}
+            {keyRows.map(row => (
+              <tr key={row.id} className="border-bottom">
+                <td className="text-bold">{row.name}</td>
+                <td>{row.group_id}</td>
+                <td>{row.masked_key}</td>
+                <td>{row.creator_id}</td>
+                <td>{row.updated_at}</td>
+                <td>
+                  <Group spacing="md">
+                    <Icon
+                      name="pencil"
+                      onClick={() => setIsEditing(true)}
+                      className="cursor-pointer"
+                    />
+                    <Icon
+                      name="trash"
+                      onClick={() => {
+                        setIsDeleting(true);
+                        setActiveRow(row);
+                      }}
+                      className="cursor-pointer"
+                    />
+                  </Group>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </Stack>
