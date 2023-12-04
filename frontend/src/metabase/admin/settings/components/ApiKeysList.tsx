@@ -83,11 +83,10 @@ const MOCK_ROWS = [
 
 export const ApiKeysList = () => {
   const [keyRows, setKeyRows] = useState([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [modal, setModal] = useState<"create" | "edit" | "delete" | null>(null);
   const [activeRow, setActiveRow] = useState(null);
   const handleRefresh = () => ApiKeysApi.list().then(setKeyRows);
+  const handleClose = () => setModal(null);
 
   useEffect(() => {
     // :name, :group_id, :created_at, :updated_at, and :masked_key
@@ -97,15 +96,15 @@ export const ApiKeysList = () => {
 
   return (
     <>
-      {isCreating ? (
-        <CreateApiKeyModal handleClose={() => setIsCreating(false)} />
-      ) : isEditing ? (
-        <EditApiKeyModal handleClose={() => setIsEditing(false)} />
-      ) : isDeleting ? (
+      {modal === "create" ? (
+        <CreateApiKeyModal handleClose={handleClose} />
+      ) : modal === "edit" ? (
+        <EditApiKeyModal handleClose={handleClose} />
+      ) : modal === "delete" ? (
         <DeleteApiKeyModal
           activeRow={activeRow}
           handleRefresh={handleRefresh}
-          handleClose={() => setIsDeleting(false)}
+          handleClose={handleClose}
         />
       ) : null}
       <Stack pl="md">
@@ -123,7 +122,7 @@ export const ApiKeysList = () => {
           </Stack>
           <Button
             variant="filled"
-            onClick={() => setIsCreating(true)}
+            onClick={() => setModal("create")}
           >{t`Create API Key`}</Button>
         </Group>
         <table className="ContentTable border-bottom">
@@ -149,14 +148,14 @@ export const ApiKeysList = () => {
                   <Group spacing="md">
                     <Icon
                       name="pencil"
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => setModal("edit")}
                       className="cursor-pointer"
                     />
                     <Icon
                       name="trash"
                       onClick={() => {
-                        setIsDeleting(true);
                         setActiveRow(row);
+                        setModal("delete");
                       }}
                       className="cursor-pointer"
                     />
