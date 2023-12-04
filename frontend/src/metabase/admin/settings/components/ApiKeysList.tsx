@@ -13,6 +13,7 @@ export const ApiKeysList = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [activeId, setActiveId] = useState(null);
 
   useEffect(() => {
     // :name, :group_id, :created_at, :updated_at, and :masked_key
@@ -20,6 +21,7 @@ export const ApiKeysList = () => {
     setKeyRows([
       {
         name: "Development API Key",
+        id: 1,
         group_id: 1,
         creator_id: 1,
         masked_key: "asdfasdfa",
@@ -28,6 +30,7 @@ export const ApiKeysList = () => {
       },
       {
         name: "Production API Key",
+        id: 2,
         group_id: 1,
         creator_id: 1,
         masked_key: "asdfasdfa",
@@ -68,6 +71,11 @@ export const ApiKeysList = () => {
             <Button
               variant="filled"
               color="error.0"
+              onClick={async () => {
+                await ApiKeysApi.delete({ id: activeId });
+                setIsDeleting(false);
+                ApiKeysApi.list().then(setKeyRows);
+              }}
             >{t`Delete API Key`}</Button>
           </Group>
         </Stack>
@@ -105,14 +113,15 @@ export const ApiKeysList = () => {
             {keyRows.map(
               ({
                 name,
+                id,
                 group_id,
                 creator_id,
                 masked_key,
                 created_at,
                 updated_at,
               }) => (
-                <tr key={name} className="border-bottom">
-                  <td>{name}</td>
+                <tr key={id} className="border-bottom">
+                  <td className="text-bold">{name}</td>
                   <td>{group_id}</td>
                   <td>{masked_key}</td>
                   <td>{creator_id}</td>
@@ -126,7 +135,10 @@ export const ApiKeysList = () => {
                       />
                       <Icon
                         name="trash"
-                        onClick={() => setIsDeleting(true)}
+                        onClick={() => {
+                          setIsDeleting(true);
+                          setActiveId(id);
+                        }}
                         className="cursor-pointer"
                       />
                     </Group>
