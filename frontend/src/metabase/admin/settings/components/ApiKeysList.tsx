@@ -52,11 +52,26 @@ export const ApiKeysList = () => {
         title={t`Edit API Key`}
       />
       <Modal
+        size="30rem"
         padding="xl"
         opened={isDeleting}
         onClose={() => setIsDeleting(false)}
         title={t`Delete API Key`}
-      />
+      >
+        <Stack>
+          <p>{t`API key deleted can’t be recovered. You have to create a new key.`}</p>
+          <Group position="right">
+            <Button
+              color="error.0"
+              onClick={() => setIsDeleting(false)}
+            >{t`No, don’t delete`}</Button>
+            <Button
+              variant="filled"
+              color="error.0"
+            >{t`Delete API Key`}</Button>
+          </Group>
+        </Stack>
+      </Modal>
       <Stack pl="md">
         <Breadcrumbs
           className="mb3"
