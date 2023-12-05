@@ -39,7 +39,7 @@ const SecretKeyModal = ({ secretKey, onClose }) => {
         />
         <Flex direction="row" gap="md" className="text-medium">
           <Icon name="info_filled" size={22} style={{ marginTop: "-4px" }} />
-          <span className="text-small">{t`Please copy this key and save it somewhere safe. For security reasons, we can't show it to you again.`}</span>
+          <span className="text-small">{t`Please copy this key and save it somewhere safe. For security reasons, we can’t show it to you again.`}</span>
         </Flex>
         <Group position="right">
           <Button onClick={onClose} variant="filled">{t`Done`}</Button>
@@ -87,7 +87,7 @@ export const CreateApiKeyModal = ({ onClose }) => {
               label={t`Select a group to inherit its permissions`}
               data={groups.map(({ id, name }) => ({ value: id, label: name }))}
             />
-            <p className="text-small">{t`We don't version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there's a chance you might have to update your code in the future.`}</p>
+            <p className="text-small">{t`We don’t version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there’s a chance you might have to update your code in the future.`}</p>
             <FormErrorMessage />
             <Group position="right">
               <Button onClick={onClose}>{t`Cancel`}</Button>
