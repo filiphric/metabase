@@ -2,20 +2,55 @@ import { t } from "ttag";
 import { useEffect, useState } from "react";
 
 import { Modal, Button, Stack, Group } from "metabase/ui";
+import GroupEntity from "metabase/entities/groups";
 
 import Breadcrumbs from "metabase/components/Breadcrumbs";
 import { ApiKeysApi } from "metabase/services";
 import { Icon } from "metabase/core/components/Icon";
-import { Form, FormProvider } from "metabase/forms";
+import {
+  Form,
+  FormProvider,
+  FormSelect,
+  FormSubmitButton,
+  FormTextInput,
+} from "metabase/forms";
+import { useSelector } from "metabase/lib/redux";
 
 export const CreateApiKeyModal = ({ onClose }) => {
+  const groups = useSelector(GroupEntity.selectors.getList);
   return (
     <Modal
       padding="xl"
       opened
       onClose={onClose}
       title={t`Create a new API Key`}
-    />
+    >
+      <FormProvider
+        initialValues={{}}
+        onSubmit={async vals => {
+          await ApiKeysApi.create(vals);
+          onClose();
+          // TODO: loading
+          // TODO: error state
+        }}
+      >
+        <Form>
+          <Stack spacing="md">
+            <FormTextInput name="name" label={t`Key name`} />
+            <FormSelect
+              name="group_id"
+              label={t`Select a group to inherit its permissions`}
+              data={[]}
+            />
+            <p className="text-small">{t`We don't version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there's a chance you might have to update your code in the future.`}</p>
+            <Group position="right">
+              <Button onClick={onClose}>{t`Cancel`}</Button>
+              <FormSubmitButton variant="filled" label={t`Create`} />
+            </Group>
+          </Stack>
+        </Form>
+      </FormProvider>
+    </Modal>
   );
 };
 
