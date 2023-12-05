@@ -50,7 +50,7 @@ const SecretKeyModal = ({ secretKey, onClose }) => {
 };
 
 export const CreateApiKeyModal = ({ onClose }) => {
-  const [isShowingSecretKey, setIsShowingSecretKey] = useState(false);
+  const [modal, setModal] = useState<null | "secretKey">(null);
   const [secretKey, setSecretKey] = useState(null);
 
   const { data: groups, isLoading } = useGroupListQuery();
@@ -58,7 +58,7 @@ export const CreateApiKeyModal = ({ onClose }) => {
     return null;
   }
 
-  return isShowingSecretKey ? (
+  return modal === "secretKey" ? (
     <SecretKeyModal secretKey={secretKey} onClose={onClose} />
   ) : (
     <Modal
@@ -73,7 +73,7 @@ export const CreateApiKeyModal = ({ onClose }) => {
         }}
         onSubmit={async vals => {
           setSecretKey("1234567890");
-          setIsShowingSecretKey(true);
+          setModal("secretKey");
           // await ApiKeysApi.create(vals);
           // TODO: is loading state handled already by the FormProvider?
           // onClose(); // TODO: should we delay this before closing the modal?
@@ -100,9 +100,96 @@ export const CreateApiKeyModal = ({ onClose }) => {
   );
 };
 
-export const EditApiKeyModal = ({ onClose }) => {
-  return (
-    <Modal padding="xl" opened onClose={onClose} title={t`Edit API Key`} />
+export const EditApiKeyModal = ({ onClose, activeRow }) => {
+  const [modal, setModal] = useState<null | "regenerate" | "secretKey">(null);
+  const [secretKey, setSecretKey] = useState(null);
+  const [maskedKey, setMaskedKey] = useState<string>(activeRow.masked_key);
+
+  const { data: groups, isLoading } = useGroupListQuery();
+  if (isLoading || !groups) {
+    return null;
+  }
+
+  return modal === "secretKey" ? (
+    <SecretKeyModal secretKey={secretKey} onClose={() => setModal(null)} />
+  ) : modal === "regenerate" ? (
+    <Modal
+      padding="xl"
+      opened
+      onClose={() => setModal(null)}
+      title={t`Regenerate API key`}
+    >
+      <Stack spacing="xl">
+        <Stack spacing="xs">
+          <label className="text-bold text-light">{t`Key name`}</label>
+          <span className="text-bold">{activeRow.name}</span>
+        </Stack>
+        <Stack spacing="xs">
+          <label className="text-bold text-light">{t`Group`}</label>
+          <span className="text-bold">{activeRow.group_name}</span>
+        </Stack>
+        <div>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</div>
+        <Group position="right">
+          <Button
+            onClick={() => setModal(null)}
+          >{t`No, don’t regenerate`}</Button>
+          <Button
+            variant="filled"
+            onClick={async () => {
+              const result = await ApiKeysApi.regenerate({ id: activeRow.id });
+              setMaskedKey(result.masked_key);
+              setSecretKey(result.unmasked_key);
+              setModal("secretKey");
+            }}
+          >{t`Regenerate`}</Button>
+        </Group>
+      </Stack>
+    </Modal>
+  ) : (
+    <Modal padding="xl" opened onClose={onClose} title={t`Edit API Key`}>
+      <FormProvider
+        initialValues={{ ...activeRow, masked_key: maskedKey }}
+        onSubmit={async vals => {
+          await ApiKeysApi.edit({
+            id: vals.id,
+            group_id: vals.group_id,
+            name: vals.name,
+          });
+          onClose();
+        }}
+      >
+        {({ dirty }) => (
+          <Form>
+            <Stack spacing="md">
+              <FormTextInput name="name" label={t`Key name`} />
+              <FormSelect
+                name="group_id"
+                label={t`Select a group to inherit its permissions`}
+                data={groups.map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
+              />
+              <FormTextInput name="masked_key" label={t`API Key`} disabled />
+              <FormErrorMessage />
+              <Group position="apart" mt="lg">
+                <Button
+                  onClick={() => setModal("regenerate")}
+                >{t`Regenerate API Key`}</Button>
+                <Group position="right">
+                  <Button onClick={onClose}>{t`Cancel`}</Button>
+                  <FormSubmitButton
+                    disabled={!dirty}
+                    variant="filled"
+                    label={t`Create`}
+                  />
+                </Group>
+              </Group>
+            </Stack>
+          </Form>
+        )}
+      </FormProvider>
+    </Modal>
   );
 };
 
@@ -143,6 +230,7 @@ const MOCK_ROWS = [
     name: "Development API Key",
     id: 1,
     group_id: 1,
+    group_name: "All Users",
     creator_id: 1,
     masked_key: "asdfasdfa",
     created_at: "2010 Aug 10",
@@ -152,6 +240,7 @@ const MOCK_ROWS = [
     name: "Production API Key",
     id: 2,
     group_id: 1,
+    group_name: "All Users",
     creator_id: 1,
     masked_key: "asdfasdfa",
     created_at: "2010 Aug 10",
@@ -177,7 +266,7 @@ export const ApiKeysList = () => {
       {modal === "create" ? (
         <CreateApiKeyModal onClose={handleClose} />
       ) : modal === "edit" ? (
-        <EditApiKeyModal onClose={handleClose} />
+        <EditApiKeyModal onClose={handleClose} activeRow={activeRow} />
       ) : modal === "delete" ? (
         <DeleteApiKeyModal
           activeRow={activeRow}
@@ -226,7 +315,10 @@ export const ApiKeysList = () => {
                   <Group spacing="md">
                     <Icon
                       name="pencil"
-                      onClick={() => setModal("edit")}
+                      onClick={() => {
+                        setActiveRow(row);
+                        setModal("edit");
+                      }}
                       className="cursor-pointer"
                     />
                     <Icon

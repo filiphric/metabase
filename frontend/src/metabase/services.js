@@ -606,4 +606,6 @@ export const ApiKeysApi = {
   create: POST("/api/api-key"),
   count: GET("/api/api-key/count"),
   delete: DELETE("/api/api-key/:id"),
+  edit: PUT("/api/api-key/:id"),
+  regenerate: PUT("/api/api-key/:id/regenerate"),
 };
