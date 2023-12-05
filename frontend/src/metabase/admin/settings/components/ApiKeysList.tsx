@@ -9,15 +9,20 @@ import { ApiKeysApi } from "metabase/services";
 import { Icon } from "metabase/core/components/Icon";
 import {
   Form,
+  FormErrorMessage,
   FormProvider,
   FormSelect,
   FormSubmitButton,
   FormTextInput,
 } from "metabase/forms";
-import { useSelector } from "metabase/lib/redux";
+import { useGroupListQuery } from "metabase/common/hooks";
+import { isDefaultGroup } from "metabase/lib/groups";
 
 export const CreateApiKeyModal = ({ onClose }) => {
-  const groups = useSelector(GroupEntity.selectors.getList);
+  const { data: groups, isLoading } = useGroupListQuery();
+  if (isLoading || !groups) {
+    return null;
+  }
   return (
     <Modal
       padding="xl"
@@ -26,12 +31,13 @@ export const CreateApiKeyModal = ({ onClose }) => {
       title={t`Create a new API Key`}
     >
       <FormProvider
-        initialValues={{}}
+        initialValues={{
+          group_id: groups.find(isDefaultGroup)?.id,
+        }}
         onSubmit={async vals => {
           await ApiKeysApi.create(vals);
-          onClose();
-          // TODO: loading
-          // TODO: error state
+          // TODO: is loading state handled already by the FormProvider?
+          onClose(); // TODO: should we delay this before closing the modal?
         }}
       >
         <Form>
@@ -40,9 +46,10 @@ export const CreateApiKeyModal = ({ onClose }) => {
             <FormSelect
               name="group_id"
               label={t`Select a group to inherit its permissions`}
-              data={[]}
+              data={groups.map(({ id, name }) => ({ value: id, label: name }))}
             />
             <p className="text-small">{t`We don't version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there's a chance you might have to update your code in the future.`}</p>
+            <FormErrorMessage />
             <Group position="right">
               <Button onClick={onClose}>{t`Cancel`}</Button>
               <FormSubmitButton variant="filled" label={t`Create`} />

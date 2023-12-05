@@ -603,7 +603,7 @@ export const MetabotApi = {
 
 export const ApiKeysApi = {
   list: GET("/api/api-key"),
-  create: POST("/api/api-key/"),
+  create: POST("/api/api-key"),
   count: GET("/api/api-key/count"),
   delete: DELETE("/api/api-key/:id"),
 };
