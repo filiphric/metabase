@@ -1,8 +1,7 @@
 import { t } from "ttag";
 import { useEffect, useState } from "react";
 
-import { Modal, Button, Stack, Group } from "metabase/ui";
-import GroupEntity from "metabase/entities/groups";
+import { Flex, Modal, Button, Stack, Group, TextInput } from "metabase/ui";
 
 import Breadcrumbs from "metabase/components/Breadcrumbs";
 import { ApiKeysApi } from "metabase/services";
@@ -17,13 +16,49 @@ import {
 } from "metabase/forms";
 import { useGroupListQuery } from "metabase/common/hooks";
 import { isDefaultGroup } from "metabase/lib/groups";
+import { CopyWidgetButton } from "./ApiKeysList.styled";
+
+const SecretKeyModal = ({ secretKey, onClose }) => {
+  return (
+    <Modal
+      padding="xl"
+      opened
+      onClose={onClose}
+      title={t`Copy and save the API key`}
+    >
+      <Stack spacing="xl">
+        <TextInput
+          label={t`The API key`}
+          value={secretKey}
+          readOnly
+          rightSection={<CopyWidgetButton value={secretKey} />}
+          // TODO: style monospace with gray background
+        />
+        <Flex direction="row" gap="md">
+          {/*TODO: style this with medium color*/}
+          <Icon size={22} name="info_filled" />
+          <span className="text-small">{t`Please copy this key and save it somewhere safe. For security reasons, we can't show it to you again.`}</span>
+        </Flex>
+        <Group position="right">
+          <Button onClick={onClose} variant="filled">{t`Done`}</Button>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+};
 
 export const CreateApiKeyModal = ({ onClose }) => {
+  const [isShowingSecretKey, setIsShowingSecretKey] = useState(false);
+  const [secretKey, setSecretKey] = useState(null);
+
   const { data: groups, isLoading } = useGroupListQuery();
   if (isLoading || !groups) {
     return null;
   }
-  return (
+
+  return isShowingSecretKey ? (
+    <SecretKeyModal secretKey={secretKey} onClose={onClose} />
+  ) : (
     <Modal
       padding="xl"
       opened
@@ -35,9 +70,11 @@ export const CreateApiKeyModal = ({ onClose }) => {
           group_id: groups.find(isDefaultGroup)?.id,
         }}
         onSubmit={async vals => {
-          await ApiKeysApi.create(vals);
+          setSecretKey("1234567890");
+          setIsShowingSecretKey(true);
+          // await ApiKeysApi.create(vals);
           // TODO: is loading state handled already by the FormProvider?
-          onClose(); // TODO: should we delay this before closing the modal?
+          // onClose(); // TODO: should we delay this before closing the modal?
         }}
       >
         <Form>
@@ -87,6 +124,7 @@ export const DeleteApiKeyModal = ({ onClose, refreshList, activeRow }) => {
             variant="filled"
             color="error.0"
             onClick={async () => {
+              // TODO: display error message
               await ApiKeysApi.delete({ id: activeRow.id });
               onClose();
               refreshList();
