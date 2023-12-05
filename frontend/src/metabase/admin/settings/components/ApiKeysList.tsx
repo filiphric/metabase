@@ -16,11 +16,13 @@ import {
 } from "metabase/forms";
 import { useGroupListQuery } from "metabase/common/hooks";
 import { isDefaultGroup } from "metabase/lib/groups";
+import { DEFAULT_Z_INDEX } from "metabase/components/Popover/constants";
 import { CopyWidgetButton } from "./ApiKeysList.styled";
 
 const SecretKeyModal = ({ secretKey, onClose }) => {
   return (
     <Modal
+      zIndex={DEFAULT_Z_INDEX} // prevents CopyWidgetButton’s Tippy popover from being obscured
       padding="xl"
       opened
       onClose={onClose}
@@ -31,14 +33,12 @@ const SecretKeyModal = ({ secretKey, onClose }) => {
           label={t`The API key`}
           value={secretKey}
           readOnly
-          // FIXME: tooltip not working. replace with custom component using Mantine tooltip
           rightSection={<CopyWidgetButton value={secretKey} />}
           disabled
           styles={{ input: { color: `black !important` } }}
         />
-        <Flex direction="row" gap="md">
-          {/*TODO: style this with medium color*/}
-          <Icon size={22} name="info_filled" />
+        <Flex direction="row" gap="md" className="text-medium">
+          <Icon name="info_filled" size={22} style={{ marginTop: "-4px" }} />
           <span className="text-small">{t`Please copy this key and save it somewhere safe. For security reasons, we can't show it to you again.`}</span>
         </Flex>
         <Group position="right">
