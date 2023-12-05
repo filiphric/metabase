@@ -33,7 +33,8 @@ const SecretKeyModal = ({ secretKey, onClose }) => {
           readOnly
           // FIXME: tooltip not working. replace with custom component using Mantine tooltip
           rightSection={<CopyWidgetButton value={secretKey} />}
-          // TODO: style monospace with gray background
+          disabled
+          styles={{ input: { color: `black !important` } }}
         />
         <Flex direction="row" gap="md">
           {/*TODO: style this with medium color*/}
