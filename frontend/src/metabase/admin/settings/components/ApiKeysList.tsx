@@ -31,6 +31,7 @@ const SecretKeyModal = ({ secretKey, onClose }) => {
           label={t`The API key`}
           value={secretKey}
           readOnly
+          // FIXME: tooltip not working. replace with custom component using Mantine tooltip
           rightSection={<CopyWidgetButton value={secretKey} />}
           // TODO: style monospace with gray background
         />
