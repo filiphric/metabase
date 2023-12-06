@@ -16,11 +16,19 @@ import { useGroupListQuery } from "metabase/common/hooks";
 
 import { SecretKeyModal } from "./SecretKeyModal";
 
-export const EditApiKeyModal = ({ onClose, activeRow }) => {
+export const EditApiKeyModal = ({
+  onClose,
+  refreshList,
+  activeRow,
+}: {
+  onClose: () => void;
+  refreshList: () => void;
+  activeRow: any;
+}) => {
   const [modal, setModal] = useState<"edit" | "regenerate" | "secretKey">(
     "edit",
   );
-  const [secretKey, setSecretKey] = useState(null);
+  const [secretKey, setSecretKey] = useState<string>("");
   const [maskedKey, setMaskedKey] = useState<string>(activeRow.masked_key);
 
   const { data: groups, isLoading } = useGroupListQuery();
@@ -80,6 +88,7 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
                 setMaskedKey(result.masked_key);
                 setSecretKey(result.unmasked_key);
                 setModal("secretKey");
+                refreshList();
               }}
             >{t`Regenerate`}</Button>
           </Group>
@@ -105,6 +114,7 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
               group_id: vals.group_id,
               name: vals.name,
             });
+            refreshList();
             onClose();
           }}
         >

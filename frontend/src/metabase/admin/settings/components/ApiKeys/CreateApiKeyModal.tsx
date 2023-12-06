@@ -10,15 +10,22 @@ import {
   FormSubmitButton,
   FormTextInput,
 } from "metabase/forms";
+import { ApiKeysApi } from "metabase/services";
 
 import { useGroupListQuery } from "metabase/common/hooks";
 import { isDefaultGroup } from "metabase/lib/groups";
 
 import { SecretKeyModal } from "./SecretKeyModal";
 
-export const CreateApiKeyModal = ({ onClose }) => {
+export const CreateApiKeyModal = ({
+  onClose,
+  refreshList,
+}: {
+  onClose: () => void;
+  refreshList: () => void;
+}) => {
   const [modal, setModal] = useState<"create" | "secretKey">("create");
-  const [secretKey, setSecretKey] = useState(null);
+  const [secretKey, setSecretKey] = useState<string>("");
 
   const { data: groups, isLoading } = useGroupListQuery();
   if (isLoading || !groups) {
@@ -43,11 +50,10 @@ export const CreateApiKeyModal = ({ onClose }) => {
             group_id: groups.find(isDefaultGroup)?.id,
           }}
           onSubmit={async vals => {
-            setSecretKey("zaCELgL.0imfnc8mVLWwsAawjYr4Rx-Af50DDqtl");
+            const response = await ApiKeysApi.create(vals);
+            setSecretKey(response.masked_key);
             setModal("secretKey");
-            // await ApiKeysApi.create(vals);
-            // TODO: is loading state handled already by the FormProvider?
-            // onClose(); // TODO: should we delay this before closing the modal?
+            refreshList();
           }}
         >
           {({ dirty }) => (

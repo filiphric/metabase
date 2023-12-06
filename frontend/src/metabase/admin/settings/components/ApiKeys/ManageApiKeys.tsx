@@ -1,5 +1,5 @@
 import { t } from "ttag";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Stack, Title, Text, Button, Group } from "metabase/ui";
 
@@ -38,32 +38,34 @@ export const ManageApiKeys = () => {
   const [keyRows, setKeyRows] = useState(null);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
   const [activeRow, setActiveRow] = useState(null);
-  const refreshList = () => ApiKeysApi.list().then(setKeyRows);
+
+  const refreshList = useCallback(() => {
+    // ApiKeysApi.list().then(setKeyRows);
+    setKeyRows(MOCK_ROWS);
+  }, []);
   const handleClose = () => setModal(null);
 
-  useEffect(() => {
-    // :name, :group_id, :created_at, :updated_at, and :masked_key
-    ApiKeysApi.list().then(setKeyRows);
-    if (true) {
-      setKeyRows(MOCK_ROWS);
-    } else {
-      setKeyRows([]);
-    }
-  }, []);
+  useEffect(refreshList);
+
+  // TODO: Display <LoadingAndErrorWrapper isLoading={} error={}>
 
   const isTableEmpty = keyRows?.length === 0;
 
   return (
     <>
       {modal === "create" ? (
-        <CreateApiKeyModal onClose={handleClose} />
+        <CreateApiKeyModal onClose={handleClose} refreshList={refreshList} />
       ) : modal === "edit" ? (
-        <EditApiKeyModal onClose={handleClose} activeRow={activeRow} />
+        <EditApiKeyModal
+          onClose={handleClose}
+          refreshList={refreshList}
+          activeRow={activeRow}
+        />
       ) : modal === "delete" ? (
         <DeleteApiKeyModal
           activeRow={activeRow}
-          refreshList={refreshList}
           onClose={handleClose}
+          refreshList={refreshList}
         />
       ) : null}
       <Stack pl="md" spacing="lg">

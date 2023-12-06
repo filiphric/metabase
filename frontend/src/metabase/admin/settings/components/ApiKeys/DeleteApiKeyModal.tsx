@@ -3,7 +3,15 @@ import { t } from "ttag";
 import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import { ApiKeysApi } from "metabase/services";
 
-export const DeleteApiKeyModal = ({ onClose, refreshList, activeRow }) => {
+export const DeleteApiKeyModal = ({
+  onClose,
+  refreshList,
+  activeRow,
+}: {
+  onClose: () => void;
+  refreshList: () => void;
+  activeRow: any;
+}) => {
   return (
     <Modal
       size="30rem"
@@ -25,8 +33,8 @@ export const DeleteApiKeyModal = ({ onClose, refreshList, activeRow }) => {
             onClick={async () => {
               // TODO: display error message
               await ApiKeysApi.delete({ id: activeRow.id });
-              onClose();
               refreshList();
+              onClose();
             }}
           >{t`Delete API Key`}</Button>
         </Group>
