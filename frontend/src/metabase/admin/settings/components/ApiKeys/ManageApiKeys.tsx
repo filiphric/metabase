@@ -44,8 +44,11 @@ export const ManageApiKeys = () => {
   useEffect(() => {
     // :name, :group_id, :created_at, :updated_at, and :masked_key
     ApiKeysApi.list().then(setKeyRows);
-    // setKeyRows(MOCK_ROWS);
-    setKeyRows([]);
+    if (false) {
+      setKeyRows(MOCK_ROWS);
+    } else {
+      setKeyRows([]);
+    }
   }, []);
 
   const isTableEmpty = keyRows?.length === 0;
@@ -74,7 +77,7 @@ export const ManageApiKeys = () => {
           <Stack>
             <Title>{t`Manage API Keys`}</Title>
             {!isTableEmpty && (
-              <Text>{t`Allow users to use the API keys to authenticate their API calls.`}</Text>
+              <Text color="text.1">{t`Allow users to use the API keys to authenticate their API calls.`}</Text>
             )}
           </Stack>
           <Button
@@ -126,7 +129,7 @@ export const ManageApiKeys = () => {
           </tbody>
         </table>
         {isTableEmpty && (
-          <Stack align="center" justify="center" spacing="sm">
+          <Stack h="40rem" align="center" justify="center" spacing="sm">
             <Title>{t`No API keys here yet`}</Title>
             <Text color="text.1">{t`Create API keys to programmatically authenticate their API calls.`}</Text>
           </Stack>
