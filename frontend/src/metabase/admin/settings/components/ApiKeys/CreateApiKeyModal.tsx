@@ -71,7 +71,7 @@ export const CreateApiKeyModal = ({
                   label={t`Select a group to inherit its permissions`}
                   size="sm"
                   data={groups.map(({ id, name }) => ({
-                    value: id,
+                    value: String(id),
                     label: name,
                   }))}
                 />

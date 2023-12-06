@@ -11,41 +11,22 @@ import { CreateApiKeyModal } from "./CreateApiKeyModal";
 import { EditApiKeyModal } from "./EditApiKeyModal";
 import { DeleteApiKeyModal } from "./DeleteApiKeyModal";
 
-const MOCK_ROWS = [
-  {
-    name: "Development API Key",
-    id: 1,
-    group_id: 1,
-    group_name: "All Users",
-    creator_id: 1,
-    masked_key: "asdfasdfa",
-    created_at: "2010 Aug 10",
-    updated_at: "2010 Aug 10",
-  },
-  {
-    name: "Production API Key",
-    id: 2,
-    group_id: 1,
-    group_name: "All Users",
-    creator_id: 1,
-    masked_key: "asdfasdfa",
-    created_at: "2010 Aug 10",
-    updated_at: "2010 Aug 10",
-  },
-];
+// TODO: add type for apikey rows
 
 export const ManageApiKeys = () => {
-  const [keyRows, setKeyRows] = useState(null);
+  const [keyRows, setKeyRows] = useState<null | any[]>(null);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
   const [activeRow, setActiveRow] = useState(null);
 
   const refreshList = useCallback(() => {
-    // ApiKeysApi.list().then(setKeyRows);
-    setKeyRows(MOCK_ROWS);
+    ApiKeysApi.list().then(setKeyRows);
   }, []);
+
   const handleClose = () => setModal(null);
 
-  useEffect(refreshList);
+  useEffect(() => {
+    refreshList();
+  }, [refreshList]);
 
   // TODO: Display <LoadingAndErrorWrapper isLoading={} error={}>
 

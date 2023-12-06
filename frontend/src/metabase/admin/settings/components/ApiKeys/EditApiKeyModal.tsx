@@ -16,6 +16,75 @@ import { useGroupListQuery } from "metabase/common/hooks";
 
 import { SecretKeyModal } from "./SecretKeyModal";
 
+type EditModalName = "edit" | "regenerate" | "secretKey";
+
+const RegenerateKeyModal = ({
+  activeRow,
+  setModal,
+  setMaskedKey,
+  setSecretKey,
+  refreshList,
+}: {
+  activeRow: any;
+  setModal: (name: EditModalName) => void;
+  setMaskedKey: (key: string) => void;
+  setSecretKey: (key: string) => void;
+  refreshList: () => void;
+}) => {
+  return (
+    <Modal
+      size="30rem"
+      padding="xl"
+      opened
+      onClose={() => setModal("edit")}
+      title={t`Regenerate API key`}
+    >
+      <Stack spacing="lg">
+        <Stack spacing="xs">
+          <Text
+            component="label"
+            weight="bold"
+            color="text.0"
+            size="sm"
+          >{t`Key name`}</Text>
+          <Text weight="bold" size="sm">
+            {activeRow.name}
+          </Text>
+        </Stack>
+        <Stack spacing="xs">
+          <Text
+            component="label"
+            weight="bold"
+            color="text.0"
+            size="sm"
+          >{t`Group`}</Text>
+          <Text weight="bold" size="sm">
+            {activeRow.group_name}
+          </Text>
+        </Stack>
+        <Text>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</Text>
+        <Group position="right">
+          <Button
+            onClick={() => setModal("edit")}
+          >{t`No, don’t regenerate`}</Button>
+          <Button
+            variant="filled"
+            onClick={async () => {
+              const result = await ApiKeysApi.regenerate({
+                id: activeRow.id,
+              });
+              setMaskedKey(result.masked_key);
+              setSecretKey(result.unmasked_key);
+              setModal("secretKey");
+              refreshList();
+            }}
+          >{t`Regenerate`}</Button>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+};
+
 export const EditApiKeyModal = ({
   onClose,
   refreshList,
@@ -25,9 +94,7 @@ export const EditApiKeyModal = ({
   refreshList: () => void;
   activeRow: any;
 }) => {
-  const [modal, setModal] = useState<"edit" | "regenerate" | "secretKey">(
-    "edit",
-  );
+  const [modal, setModal] = useState<EditModalName>("edit");
   const [secretKey, setSecretKey] = useState<string>("");
   const [maskedKey, setMaskedKey] = useState<string>(activeRow.masked_key);
 
@@ -44,56 +111,13 @@ export const EditApiKeyModal = ({
 
   if (modal === "regenerate") {
     return (
-      <Modal
-        size="30rem"
-        padding="xl"
-        opened
-        onClose={() => setModal("edit")}
-        title={t`Regenerate API key`}
-      >
-        <Stack spacing="lg">
-          <Stack spacing="xs">
-            <Text
-              component="label"
-              weight="bold"
-              color="text.0"
-              size="sm"
-            >{t`Key name`}</Text>
-            <Text weight="bold" size="sm">
-              {activeRow.name}
-            </Text>
-          </Stack>
-          <Stack spacing="xs">
-            <Text
-              component="label"
-              weight="bold"
-              color="text.0"
-              size="sm"
-            >{t`Group`}</Text>
-            <Text weight="bold" size="sm">
-              {activeRow.group_name}
-            </Text>
-          </Stack>
-          <Text>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</Text>
-          <Group position="right">
-            <Button
-              onClick={() => setModal("edit")}
-            >{t`No, don’t regenerate`}</Button>
-            <Button
-              variant="filled"
-              onClick={async () => {
-                const result = await ApiKeysApi.regenerate({
-                  id: activeRow.id,
-                });
-                setMaskedKey(result.masked_key);
-                setSecretKey(result.unmasked_key);
-                setModal("secretKey");
-                refreshList();
-              }}
-            >{t`Regenerate`}</Button>
-          </Group>
-        </Stack>
-      </Modal>
+      <RegenerateKeyModal
+        activeRow={activeRow}
+        setModal={setModal}
+        setMaskedKey={setMaskedKey}
+        setSecretKey={setSecretKey}
+        refreshList={refreshList}
+      />
     );
   }
 
@@ -133,7 +157,7 @@ export const EditApiKeyModal = ({
                   label={t`Select a group to inherit its permissions`}
                   size="sm"
                   data={groups.map(({ id, name }) => ({
-                    value: id,
+                    value: String(id),
                     label: name,
                   }))}
                 />
