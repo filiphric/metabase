@@ -2,7 +2,7 @@ import { updateIn } from "icepick";
 
 import { PLUGIN_ADMIN_SETTINGS_UPDATES } from "metabase/plugins";
 import { ApiKeysAuthCard } from "metabase/admin/settings/auth/components/ApiKeysAuthCard";
-import { ApiKeysList } from "metabase/admin/settings/components/ApiKeysList";
+import { ManageApiKeys } from "metabase/admin/settings/components/ApiKeys/ManageApiKeys";
 
 PLUGIN_ADMIN_SETTINGS_UPDATES.push(
   sections =>
@@ -18,7 +18,7 @@ PLUGIN_ADMIN_SETTINGS_UPDATES.push(
   sections => ({
     ...sections,
     "authentication/api-keys": {
-      component: ApiKeysList,
+      component: ManageApiKeys,
       settings: [],
     },
   }),
