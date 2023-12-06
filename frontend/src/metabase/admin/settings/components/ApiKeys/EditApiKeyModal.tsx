@@ -1,7 +1,7 @@
 import { t } from "ttag";
 import { useState } from "react";
 
-import { Button, Group, Modal, Stack } from "metabase/ui";
+import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import {
   Form,
   FormErrorMessage,
@@ -42,16 +42,30 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
         onClose={() => setModal("edit")}
         title={t`Regenerate API key`}
       >
-        <Stack spacing="xl">
+        <Stack spacing="lg">
           <Stack spacing="xs">
-            <label className="text-bold text-light">{t`Key name`}</label>
-            <span className="text-bold">{activeRow.name}</span>
+            <Text
+              component="label"
+              weight="bold"
+              color="text.0"
+              size="sm"
+            >{t`Key name`}</Text>
+            <Text weight="bold" size="sm">
+              {activeRow.name}
+            </Text>
           </Stack>
           <Stack spacing="xs">
-            <label className="text-bold text-light">{t`Group`}</label>
-            <span className="text-bold">{activeRow.group_name}</span>
+            <Text
+              component="label"
+              weight="bold"
+              color="text.0"
+              size="sm"
+            >{t`Group`}</Text>
+            <Text weight="bold" size="sm">
+              {activeRow.group_name}
+            </Text>
           </Stack>
-          <div>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</div>
+          <Text>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</Text>
           <Group position="right">
             <Button
               onClick={() => setModal("edit")}
@@ -90,16 +104,29 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
           {({ dirty }) => (
             <Form>
               <Stack spacing="md">
-                <FormTextInput name="name" label={t`Key name`} />
+                <FormTextInput
+                  name="name"
+                  label={t`Key name`}
+                  size="sm"
+                  required
+                  withAsterisk={false}
+                />
                 <FormSelect
                   name="group_id"
                   label={t`Select a group to inherit its permissions`}
+                  size="sm"
                   data={groups.map(({ id, name }) => ({
                     value: id,
                     label: name,
                   }))}
                 />
-                <FormTextInput name="masked_key" label={t`API Key`} disabled />
+                <FormTextInput
+                  name="masked_key"
+                  label={t`API Key`}
+                  size="sm"
+                  styles={{ input: { fontFamily: "Monaco, monospace" } }}
+                  disabled
+                />
                 <FormErrorMessage />
                 <Group position="apart" mt="lg">
                   <Button
@@ -110,7 +137,7 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
                     <FormSubmitButton
                       disabled={!dirty}
                       variant="filled"
-                      label={t`Create`}
+                      label={t`Save`}
                     />
                   </Group>
                 </Group>

@@ -57,6 +57,7 @@ export const CreateApiKeyModal = ({ onClose }) => {
                   label={t`Key name`}
                   size="sm"
                   required
+                  withAsterisk={false}
                 />
                 <FormSelect
                   name="group_id"
@@ -66,9 +67,11 @@ export const CreateApiKeyModal = ({ onClose }) => {
                     value: id,
                     label: name,
                   }))}
-                  required
                 />
-                <Text size="sm">{t`We don’t version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there’s a chance you might have to update your code in the future.`}</Text>
+                <Text
+                  my="sm"
+                  size="sm"
+                >{t`We don’t version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there’s a chance you might have to update your code in the future.`}</Text>
                 <FormErrorMessage />
                 <Group position="right">
                   <Button onClick={onClose}>{t`Cancel`}</Button>
