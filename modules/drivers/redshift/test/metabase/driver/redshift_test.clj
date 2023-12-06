@@ -20,6 +20,7 @@
    [metabase.public-settings :as public-settings]
    [metabase.query-processor :as qp]
    [metabase.query-processor.test-util :as qp.test-util]
+   [metabase.query-processor.timezone :as qp.timezone]
    [metabase.sync :as sync]
    [metabase.test :as mt]
    [metabase.test.data.interface :as tx]
@@ -504,6 +505,17 @@
              (mt/with-system-timezone-id "Europe/Prague"
                (let [test-thunk (getdate-vs-ss-ts-test-thunk-generator)]
                  (test-thunk))))))))))
+
+(deftest debug-timezones-test
+  (mt/test-driver
+   :redshift
+   (mt/with-metadata-provider (mt/id)
+     (testing "check which timezone is used in testing environment"
+       (is (= ["x" "x" "x" "x"]
+              ["results" (qp.timezone/results-timezone-id)
+               "report" (qp.timezone/report-timezone-id-if-supported :redshift ::qp.timezone/db-from-store)
+               "database" (qp.timezone/database-timezone-id ::qp.timezone/db-from-store)
+               "system" (qp.timezone/system-timezone-id)]))))))
 
 (deftest server-side-relative-datetime-various-units-test
   (mt/test-driver
