@@ -1,7 +1,7 @@
 import { t } from "ttag";
 import { useEffect, useState } from "react";
 
-import { Button, Stack, Group } from "metabase/ui";
+import { Stack, Title, Text, Button, Group } from "metabase/ui";
 
 import Breadcrumbs from "metabase/components/Breadcrumbs";
 import { ApiKeysApi } from "metabase/services";
@@ -35,7 +35,7 @@ const MOCK_ROWS = [
 ];
 
 export const ManageApiKeys = () => {
-  const [keyRows, setKeyRows] = useState([]);
+  const [keyRows, setKeyRows] = useState(null);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
   const [activeRow, setActiveRow] = useState(null);
   const refreshList = () => ApiKeysApi.list().then(setKeyRows);
@@ -45,6 +45,7 @@ export const ManageApiKeys = () => {
     // :name, :group_id, :created_at, :updated_at, and :masked_key
     ApiKeysApi.list().then(setKeyRows);
     setKeyRows(MOCK_ROWS);
+    // setKeyRows([]);
   }, []);
 
   return (
@@ -60,9 +61,8 @@ export const ManageApiKeys = () => {
           onClose={handleClose}
         />
       ) : null}
-      <Stack pl="md">
+      <Stack pl="md" spacing="lg">
         <Breadcrumbs
-          className="mb3"
           crumbs={[
             [t`Authentication`, "/admin/settings/authentication"],
             [t`API Keys`],
@@ -70,8 +70,8 @@ export const ManageApiKeys = () => {
         />
         <Group align="end" position="apart">
           <Stack>
-            <h2>{t`Manage API Keys`}</h2>
-            <p>{t`Allow users to use the API keys to authenticate their API calls.`}</p>
+            <Title>{t`Manage API Keys`}</Title>
+            <Text>{t`Allow users to use the API keys to authenticate their API calls.`}</Text>
           </Stack>
           <Button
             variant="filled"
@@ -90,7 +90,7 @@ export const ManageApiKeys = () => {
             </tr>
           </thead>
           <tbody>
-            {keyRows.map(row => (
+            {keyRows?.map(row => (
               <tr key={row.id} className="border-bottom">
                 <td className="text-bold">{row.name}</td>
                 <td>{row.group_id}</td>
@@ -121,6 +121,12 @@ export const ManageApiKeys = () => {
             ))}
           </tbody>
         </table>
+        {keyRows?.length === 0 && (
+          <Stack h="40rem" align="center" justify="center" spacing="sm">
+            <Title>{t`No API keys here yet`}</Title>
+            <Text color="text.1">{t`Create API keys to programmatically authenticate their API calls.`}</Text>
+          </Stack>
+        )}
       </Stack>
     </>
   );
