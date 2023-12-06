@@ -44,7 +44,7 @@ export const ManageApiKeys = () => {
   useEffect(() => {
     // :name, :group_id, :created_at, :updated_at, and :masked_key
     ApiKeysApi.list().then(setKeyRows);
-    if (false) {
+    if (true) {
       setKeyRows(MOCK_ROWS);
     } else {
       setKeyRows([]);

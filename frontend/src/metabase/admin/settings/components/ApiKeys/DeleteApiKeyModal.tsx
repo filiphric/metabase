@@ -1,6 +1,6 @@
 import { t } from "ttag";
 
-import { Button, Group, Modal, Stack } from "metabase/ui";
+import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import { ApiKeysApi } from "metabase/services";
 
 export const DeleteApiKeyModal = ({ onClose, refreshList, activeRow }) => {
@@ -12,8 +12,8 @@ export const DeleteApiKeyModal = ({ onClose, refreshList, activeRow }) => {
       onClose={onClose}
       title={t`Delete API Key`}
     >
-      <Stack>
-        <p>{t`API key deleted can’t be recovered. You have to create a new key.`}</p>
+      <Stack spacing="lg">
+        <Text>{t`API key deleted can’t be recovered. You have to create a new key.`}</Text>
         <Group position="right">
           <Button
             color="error.0"
