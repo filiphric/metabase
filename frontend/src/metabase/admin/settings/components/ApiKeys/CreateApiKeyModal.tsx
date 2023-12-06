@@ -32,6 +32,7 @@ export const CreateApiKeyModal = ({ onClose }) => {
   if (modal === "create") {
     return (
       <Modal
+        size="30rem"
         padding="xl"
         opened
         onClose={onClose}
@@ -42,7 +43,7 @@ export const CreateApiKeyModal = ({ onClose }) => {
             group_id: groups.find(isDefaultGroup)?.id,
           }}
           onSubmit={async vals => {
-            setSecretKey("1234567890");
+            setSecretKey("zaCELgL.0imfnc8mVLWwsAawjYr4Rx-Af50DDqtl");
             setModal("secretKey");
             // await ApiKeysApi.create(vals);
             // TODO: is loading state handled already by the FormProvider?

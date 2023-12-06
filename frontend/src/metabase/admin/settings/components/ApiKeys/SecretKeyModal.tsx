@@ -22,8 +22,9 @@ export const SecretKeyModal = ({
   onClose: () => void;
 }) => (
   <Modal
-    zIndex={DEFAULT_Z_INDEX} // prevents CopyWidgetButton’s Tippy popover from being obscured
+    size="30rem"
     padding="xl"
+    zIndex={DEFAULT_Z_INDEX} // prevents CopyWidgetButton’s Tippy popover from being obscured
     opened
     onClose={onClose}
     title={t`Copy and save the API key`}

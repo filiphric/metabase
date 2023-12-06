@@ -37,6 +37,7 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
   if (modal === "regenerate") {
     return (
       <Modal
+        size="30rem"
         padding="xl"
         opened
         onClose={() => setModal("edit")}
@@ -89,7 +90,13 @@ export const EditApiKeyModal = ({ onClose, activeRow }) => {
 
   if (modal === "edit") {
     return (
-      <Modal padding="xl" opened onClose={onClose} title={t`Edit API Key`}>
+      <Modal
+        size="30rem"
+        padding="xl"
+        opened
+        onClose={onClose}
+        title={t`Edit API Key`}
+      >
         <FormProvider
           initialValues={{ ...activeRow, masked_key: maskedKey }}
           onSubmit={async vals => {
