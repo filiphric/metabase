@@ -1,7 +1,7 @@
 import { t } from "ttag";
 import { useState } from "react";
 
-import { Button, Group, Modal, Stack } from "metabase/ui";
+import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import {
   Form,
   FormErrorMessage,
@@ -49,25 +49,38 @@ export const CreateApiKeyModal = ({ onClose }) => {
             // onClose(); // TODO: should we delay this before closing the modal?
           }}
         >
-          <Form>
-            <Stack spacing="md">
-              <FormTextInput name="name" label={t`Key name`} />
-              <FormSelect
-                name="group_id"
-                label={t`Select a group to inherit its permissions`}
-                data={groups.map(({ id, name }) => ({
-                  value: id,
-                  label: name,
-                }))}
-              />
-              <p className="text-small">{t`We don’t version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there’s a chance you might have to update your code in the future.`}</p>
-              <FormErrorMessage />
-              <Group position="right">
-                <Button onClick={onClose}>{t`Cancel`}</Button>
-                <FormSubmitButton variant="filled" label={t`Create`} />
-              </Group>
-            </Stack>
-          </Form>
+          {({ dirty }) => (
+            <Form>
+              <Stack spacing="md">
+                <FormTextInput
+                  name="name"
+                  label={t`Key name`}
+                  size="sm"
+                  required
+                />
+                <FormSelect
+                  name="group_id"
+                  label={t`Select a group to inherit its permissions`}
+                  size="sm"
+                  data={groups.map(({ id, name }) => ({
+                    value: id,
+                    label: name,
+                  }))}
+                  required
+                />
+                <Text size="sm">{t`We don’t version the Metabase API. We rarely change API endpoints, and almost never remove them, but if you write code that relies on the API, there’s a chance you might have to update your code in the future.`}</Text>
+                <FormErrorMessage />
+                <Group position="right">
+                  <Button onClick={onClose}>{t`Cancel`}</Button>
+                  <FormSubmitButton
+                    disabled={!dirty}
+                    variant="filled"
+                    label={t`Create`}
+                  />
+                </Group>
+              </Stack>
+            </Form>
+          )}
         </FormProvider>
       </Modal>
     );
