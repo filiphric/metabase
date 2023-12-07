@@ -1,5 +1,5 @@
 import { t } from "ttag";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import { ApiKeysApi } from "metabase/services";
@@ -14,7 +14,22 @@ export const DeleteApiKeyModal = ({
   activeRow: any;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      await ApiKeysApi.delete({ id: activeRow.id });
+      refreshList();
+      onClose();
+    } catch (e: any) {
+      if (e && Object.hasOwn(e, "data")) {
+        setError((e as { data: string }).data);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [refreshList, onClose, activeRow.id]);
 
   return (
     <Modal
@@ -36,18 +51,7 @@ export const DeleteApiKeyModal = ({
             disabled={isLoading}
             variant="filled"
             color="error.0"
-            onClick={async () => {
-              setIsLoading(true);
-              try {
-                await ApiKeysApi.delete({ id: activeRow.id });
-                refreshList();
-                onClose();
-              } catch (err) {
-                setError(err.data); // TODO: another way to handle this?
-              } finally {
-                setIsLoading(false);
-              }
-            }}
+            onClick={handleDelete}
           >{t`Delete API Key`}</Button>
         </Group>
       </Stack>
