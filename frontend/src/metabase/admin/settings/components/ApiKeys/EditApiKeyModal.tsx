@@ -1,5 +1,5 @@
 import { t } from "ttag";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import {
@@ -31,6 +31,14 @@ const RegenerateKeyModal = ({
   setSecretKey: (key: string) => void;
   refreshList: () => void;
 }) => {
+  const handleRegenerate = useCallback(async () => {
+    const result = await ApiKeysApi.regenerate({ id: activeRow.id });
+    setMaskedKey(result.masked_key);
+    setSecretKey(result.unmasked_key);
+    setModal("secretKey");
+    refreshList();
+  }, [activeRow.id, refreshList, setMaskedKey, setModal, setSecretKey]);
+
   return (
     <Modal
       size="30rem"
@@ -69,15 +77,7 @@ const RegenerateKeyModal = ({
           >{t`No, don’t regenerate`}</Button>
           <Button
             variant="filled"
-            onClick={async () => {
-              const result = await ApiKeysApi.regenerate({
-                id: activeRow.id,
-              });
-              setMaskedKey(result.masked_key);
-              setSecretKey(result.unmasked_key);
-              setModal("secretKey");
-              refreshList();
-            }}
+            onClick={handleRegenerate}
           >{t`Regenerate`}</Button>
         </Group>
       </Stack>
@@ -97,6 +97,19 @@ export const EditApiKeyModal = ({
   const [modal, setModal] = useState<EditModalName>("edit");
   const [secretKey, setSecretKey] = useState<string>("");
   const [maskedKey, setMaskedKey] = useState<string>(activeRow.masked_key);
+
+  const handleSubmit = useCallback(
+    async vals => {
+      await ApiKeysApi.edit({
+        id: vals.id,
+        group_id: vals.group_id,
+        name: vals.name,
+      });
+      refreshList();
+      onClose();
+    },
+    [onClose, refreshList],
+  );
 
   const { data: groups, isLoading } = useGroupListQuery();
   if (isLoading || !groups) {
@@ -132,15 +145,7 @@ export const EditApiKeyModal = ({
       >
         <FormProvider
           initialValues={{ ...activeRow, masked_key: maskedKey }}
-          onSubmit={async vals => {
-            await ApiKeysApi.edit({
-              id: vals.id,
-              group_id: vals.group_id,
-              name: vals.name,
-            });
-            refreshList();
-            onClose();
-          }}
+          onSubmit={handleSubmit}
         >
           {({ dirty }) => (
             <Form>
