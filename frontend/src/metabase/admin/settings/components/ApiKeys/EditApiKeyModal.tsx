@@ -1,6 +1,8 @@
 import { t } from "ttag";
 import { useCallback, useState } from "react";
 
+import type { ApiKey } from "metabase-types/api";
+
 import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import {
   Form,
@@ -19,25 +21,26 @@ import { SecretKeyModal } from "./SecretKeyModal";
 type EditModalName = "edit" | "regenerate" | "secretKey";
 
 const RegenerateKeyModal = ({
-  activeRow,
+  apiKey,
   setModal,
   setMaskedKey,
   setSecretKey,
   refreshList,
 }: {
-  activeRow: any;
+  apiKey: ApiKey;
   setModal: (name: EditModalName) => void;
   setMaskedKey: (key: string) => void;
   setSecretKey: (key: string) => void;
   refreshList: () => void;
 }) => {
   const handleRegenerate = useCallback(async () => {
-    const result = await ApiKeysApi.regenerate({ id: activeRow.id });
+    // TODO: handle and display error
+    const result = await ApiKeysApi.regenerate({ id: apiKey.id });
     setMaskedKey(result.masked_key);
     setSecretKey(result.unmasked_key);
     setModal("secretKey");
     refreshList();
-  }, [activeRow.id, refreshList, setMaskedKey, setModal, setSecretKey]);
+  }, [apiKey.id, refreshList, setMaskedKey, setModal, setSecretKey]);
 
   return (
     <Modal
@@ -56,7 +59,7 @@ const RegenerateKeyModal = ({
             size="sm"
           >{t`Key name`}</Text>
           <Text weight="bold" size="sm">
-            {activeRow.name}
+            {apiKey.name}
           </Text>
         </Stack>
         <Stack spacing="xs">
@@ -67,7 +70,7 @@ const RegenerateKeyModal = ({
             size="sm"
           >{t`Group`}</Text>
           <Text weight="bold" size="sm">
-            {activeRow.group_name}
+            {apiKey.group_name}
           </Text>
         </Stack>
         <Text>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</Text>
@@ -88,15 +91,15 @@ const RegenerateKeyModal = ({
 export const EditApiKeyModal = ({
   onClose,
   refreshList,
-  activeRow,
+  apiKey,
 }: {
   onClose: () => void;
   refreshList: () => void;
-  activeRow: any;
+  apiKey: ApiKey;
 }) => {
   const [modal, setModal] = useState<EditModalName>("edit");
   const [secretKey, setSecretKey] = useState<string>("");
-  const [maskedKey, setMaskedKey] = useState<string>(activeRow.masked_key);
+  const [maskedKey, setMaskedKey] = useState<string>(apiKey.masked_key);
 
   const handleSubmit = useCallback(
     async vals => {
@@ -125,7 +128,7 @@ export const EditApiKeyModal = ({
   if (modal === "regenerate") {
     return (
       <RegenerateKeyModal
-        activeRow={activeRow}
+        apiKey={apiKey}
         setModal={setModal}
         setMaskedKey={setMaskedKey}
         setSecretKey={setSecretKey}
@@ -144,7 +147,7 @@ export const EditApiKeyModal = ({
         title={t`Edit API Key`}
       >
         <FormProvider
-          initialValues={{ ...activeRow, masked_key: maskedKey }}
+          initialValues={{ ...apiKey, masked_key: maskedKey }}
           onSubmit={handleSubmit}
         >
           {({ dirty }) => (

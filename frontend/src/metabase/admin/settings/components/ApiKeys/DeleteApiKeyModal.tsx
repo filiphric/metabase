@@ -1,17 +1,19 @@
 import { t } from "ttag";
 import { useCallback, useState } from "react";
 
+import type { ApiKey } from "metabase-types/api";
+
 import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import { ApiKeysApi } from "metabase/services";
 
 export const DeleteApiKeyModal = ({
   onClose,
   refreshList,
-  activeRow,
+  apiKey,
 }: {
   onClose: () => void;
   refreshList: () => void;
-  activeRow: any;
+  apiKey: ApiKey;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export const DeleteApiKeyModal = ({
   const handleDelete = useCallback(async () => {
     try {
       setIsLoading(true);
-      await ApiKeysApi.delete({ id: activeRow.id });
+      await ApiKeysApi.delete({ id: apiKey.id });
       refreshList();
       onClose();
     } catch (e: any) {
@@ -29,7 +31,7 @@ export const DeleteApiKeyModal = ({
     } finally {
       setIsLoading(false);
     }
-  }, [refreshList, onClose, activeRow.id]);
+  }, [refreshList, onClose, apiKey.id]);
 
   return (
     <Modal

@@ -7,19 +7,43 @@ import Breadcrumbs from "metabase/components/Breadcrumbs";
 import { ApiKeysApi } from "metabase/services";
 import { Icon } from "metabase/core/components/Icon";
 
+import type { ApiKey } from "metabase-types/api";
+
 import { CreateApiKeyModal } from "./CreateApiKeyModal";
 import { EditApiKeyModal } from "./EditApiKeyModal";
 import { DeleteApiKeyModal } from "./DeleteApiKeyModal";
 
-// TODO: add type for apikey rows
+const MOCK_ROWS: ApiKey[] = [
+  {
+    name: "Development API Key",
+    id: 1,
+    group_id: 1,
+    group_name: "All Users",
+    creator_id: 1,
+    masked_key: "asdfasdfa",
+    created_at: "2010 Aug 10",
+    updated_at: "2010 Aug 10",
+  },
+  {
+    name: "Production API Key",
+    id: 2,
+    group_id: 1,
+    group_name: "All Users",
+    creator_id: 1,
+    masked_key: "asdfasdfa",
+    created_at: "2010 Aug 10",
+    updated_at: "2010 Aug 10",
+  },
+];
 
 export const ManageApiKeys = () => {
-  const [keyRows, setKeyRows] = useState<null | any[]>(null);
+  const [apiKeys, setApiKeys] = useState<null | ApiKey[]>(null);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
-  const [activeRow, setActiveRow] = useState(null);
+  const [activeApiKey, setActiveApiKey] = useState<null | ApiKey>(null);
 
   const refreshList = useCallback(() => {
-    ApiKeysApi.list().then(setKeyRows);
+    setApiKeys(MOCK_ROWS);
+    ApiKeysApi.list().then(setApiKeys);
   }, []);
 
   const handleClose = () => setModal(null);
@@ -30,21 +54,21 @@ export const ManageApiKeys = () => {
 
   // TODO: Display <LoadingAndErrorWrapper isLoading={} error={}>
 
-  const isTableEmpty = keyRows?.length === 0;
+  const isTableEmpty = apiKeys?.length === 0;
 
   return (
     <>
       {modal === "create" ? (
         <CreateApiKeyModal onClose={handleClose} refreshList={refreshList} />
-      ) : modal === "edit" ? (
+      ) : modal === "edit" && activeApiKey ? (
         <EditApiKeyModal
           onClose={handleClose}
           refreshList={refreshList}
-          activeRow={activeRow}
+          apiKey={activeApiKey}
         />
-      ) : modal === "delete" ? (
+      ) : modal === "delete" && activeApiKey ? (
         <DeleteApiKeyModal
-          activeRow={activeRow}
+          apiKey={activeApiKey}
           onClose={handleClose}
           refreshList={refreshList}
         />
@@ -80,19 +104,19 @@ export const ManageApiKeys = () => {
             </tr>
           </thead>
           <tbody>
-            {keyRows?.map(row => (
-              <tr key={row.id} className="border-bottom">
-                <td className="text-bold">{row.name}</td>
-                <td>{row.group_id}</td>
-                <td>{row.masked_key}</td>
-                <td>{row.creator_id}</td>
-                <td>{row.updated_at}</td>
+            {apiKeys?.map(apiKey => (
+              <tr key={apiKey.id} className="border-bottom">
+                <td className="text-bold">{apiKey.name}</td>
+                <td>{apiKey.group_id}</td>
+                <td>{apiKey.masked_key}</td>
+                <td>{apiKey.creator_id}</td>
+                <td>{apiKey.updated_at}</td>
                 <td>
                   <Group spacing="md">
                     <Icon
                       name="pencil"
                       onClick={() => {
-                        setActiveRow(row);
+                        setActiveApiKey(apiKey);
                         setModal("edit");
                       }}
                       className="cursor-pointer"
@@ -100,7 +124,7 @@ export const ManageApiKeys = () => {
                     <Icon
                       name="trash"
                       onClick={() => {
-                        setActiveRow(row);
+                        setActiveApiKey(apiKey);
                         setModal("delete");
                       }}
                       className="cursor-pointer"
