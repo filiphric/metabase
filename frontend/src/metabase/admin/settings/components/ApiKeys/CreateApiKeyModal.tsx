@@ -1,5 +1,5 @@
 import { t } from "ttag";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import {
@@ -27,10 +27,21 @@ export const CreateApiKeyModal = ({
   const [modal, setModal] = useState<"create" | "secretKey">("create");
   const [secretKey, setSecretKey] = useState<string>("");
 
+  const handleSubmit = useCallback(
+    async vals => {
+      const response = await ApiKeysApi.create(vals);
+      setSecretKey(response.masked_key);
+      setModal("secretKey");
+      refreshList();
+    },
+    [refreshList],
+  );
+
   const { data: groups, isLoading } = useGroupListQuery();
   if (isLoading || !groups) {
     return null;
   }
+  const defaultGroupId = String(groups.find(isDefaultGroup)?.id);
 
   if (modal === "secretKey") {
     return <SecretKeyModal secretKey={secretKey} onClose={onClose} />;
@@ -46,15 +57,8 @@ export const CreateApiKeyModal = ({
         title={t`Create a new API Key`}
       >
         <FormProvider
-          initialValues={{
-            group_id: groups.find(isDefaultGroup)?.id,
-          }}
-          onSubmit={async vals => {
-            const response = await ApiKeysApi.create(vals);
-            setSecretKey(response.masked_key);
-            setModal("secretKey");
-            refreshList();
-          }}
+          initialValues={{ group_id: defaultGroupId }}
+          onSubmit={handleSubmit}
         >
           {({ dirty }) => (
             <Form>
