@@ -1,18 +1,9 @@
 import { t } from "ttag";
 
-import {
-  Text,
-  Button,
-  Flex,
-  Group,
-  Modal,
-  Stack,
-  TextInput,
-} from "metabase/ui";
+import { Text, Button, Flex, Group, Modal, Stack } from "metabase/ui";
 import { DEFAULT_Z_INDEX } from "metabase/components/Popover/constants";
 import { Icon } from "metabase/core/components/Icon";
-
-import { CopyWidgetButton } from "./SecretKeyModal.styled";
+import { CopyTextInput } from "metabase/components/CopyTextInput";
 
 export const SecretKeyModal = ({
   secretKey,
@@ -30,12 +21,11 @@ export const SecretKeyModal = ({
     title={t`Copy and save the API key`}
   >
     <Stack spacing="xl">
-      <TextInput
+      <CopyTextInput
         label={t`The API key`}
         size="sm"
         value={secretKey}
         readOnly
-        rightSection={<CopyWidgetButton value={secretKey} />}
         disabled
         styles={{
           input: {
