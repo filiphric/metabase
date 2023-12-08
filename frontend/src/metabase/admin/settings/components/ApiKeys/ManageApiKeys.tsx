@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Stack, Title, Text, Button, Group } from "metabase/ui";
 
 import Breadcrumbs from "metabase/components/Breadcrumbs";
+import LoadingAndErrorWrapper from "metabase/components/LoadingAndErrorWrapper";
+
 import { ApiKeysApi } from "metabase/services";
 import { Icon } from "metabase/core/components/Icon";
 
@@ -40,10 +42,20 @@ export const ManageApiKeys = () => {
   const [apiKeys, setApiKeys] = useState<null | ApiKey[]>(null);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
   const [activeApiKey, setActiveApiKey] = useState<null | ApiKey>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<null | string>(null);
 
   const refreshList = useCallback(async () => {
-    setApiKeys(MOCK_ROWS);
-    setApiKeys(await ApiKeysApi.list());
+    try {
+      setIsLoading(true);
+      setApiKeys(MOCK_ROWS ?? (await ApiKeysApi.list()));
+    } catch (e: any) {
+      if (e && Object.hasOwn(e, "data")) {
+        setError((e as { data: string }).data);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleClose = () => setModal(null);
@@ -51,8 +63,6 @@ export const ManageApiKeys = () => {
   useEffect(() => {
     refreshList();
   }, [refreshList]);
-
-  // TODO: Display <LoadingAndErrorWrapper isLoading={} error={}>
 
   const isTableEmpty = apiKeys?.length === 0;
 
@@ -92,55 +102,57 @@ export const ManageApiKeys = () => {
             onClick={() => setModal("create")}
           >{t`Create API Key`}</Button>
         </Group>
-        <table className="ContentTable border-bottom">
-          <thead>
-            <tr>
-              <th>{t`Key name`}</th>
-              <th>{t`Group`}</th>
-              <th>{t`Key`}</th>
-              <th>{t`Last Modified By`}</th>
-              <th>{t`Last Modified On`}</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {apiKeys?.map(apiKey => (
-              <tr key={apiKey.id} className="border-bottom">
-                <td className="text-bold">{apiKey.name}</td>
-                <td>{apiKey.group_id}</td>
-                <td className="text-monospace">{apiKey.masked_key}</td>
-                <td>{apiKey.creator_id}</td>
-                <td>{apiKey.updated_at}</td>
-                <td>
-                  <Group spacing="md">
-                    <Icon
-                      name="pencil"
-                      onClick={() => {
-                        setActiveApiKey(apiKey);
-                        setModal("edit");
-                      }}
-                      className="cursor-pointer"
-                    />
-                    <Icon
-                      name="trash"
-                      onClick={() => {
-                        setActiveApiKey(apiKey);
-                        setModal("delete");
-                      }}
-                      className="cursor-pointer"
-                    />
-                  </Group>
-                </td>
+        <LoadingAndErrorWrapper loading={isLoading} error={error}>
+          <table className="ContentTable border-bottom">
+            <thead>
+              <tr>
+                <th>{t`Key name`}</th>
+                <th>{t`Group`}</th>
+                <th>{t`Key`}</th>
+                <th>{t`Last Modified By`}</th>
+                <th>{t`Last Modified On`}</th>
+                <th />
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {isTableEmpty && (
-          <Stack h="40rem" align="center" justify="center" spacing="sm">
-            <Title>{t`No API keys here yet`}</Title>
-            <Text color="text.1">{t`Create API keys to programmatically authenticate their API calls.`}</Text>
-          </Stack>
-        )}
+            </thead>
+            <tbody>
+              {apiKeys?.map(apiKey => (
+                <tr key={apiKey.id} className="border-bottom">
+                  <td className="text-bold">{apiKey.name}</td>
+                  <td>{apiKey.group_id}</td>
+                  <td className="text-monospace">{apiKey.masked_key}</td>
+                  <td>{apiKey.creator_id}</td>
+                  <td>{apiKey.updated_at}</td>
+                  <td>
+                    <Group spacing="md">
+                      <Icon
+                        name="pencil"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setActiveApiKey(apiKey);
+                          setModal("edit");
+                        }}
+                      />
+                      <Icon
+                        name="trash"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setActiveApiKey(apiKey);
+                          setModal("delete");
+                        }}
+                      />
+                    </Group>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {isTableEmpty && (
+            <Stack h="40rem" align="center" justify="center" spacing="sm">
+              <Title>{t`No API keys here yet`}</Title>
+              <Text color="text.1">{t`Create API keys to programmatically authenticate their API calls.`}</Text>
+            </Stack>
+          )}
+        </LoadingAndErrorWrapper>
       </Stack>
     </>
   );
