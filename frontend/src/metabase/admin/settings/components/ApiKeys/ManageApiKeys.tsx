@@ -39,7 +39,7 @@ const MOCK_ROWS: ApiKey[] = [
 ];
 
 export const ManageApiKeys = () => {
-  const [apiKeys, setApiKeys] = useState<null | ApiKey[]>(null);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
   const [activeApiKey, setActiveApiKey] = useState<null | ApiKey>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -48,7 +48,8 @@ export const ManageApiKeys = () => {
   const refreshList = useCallback(async () => {
     try {
       setIsLoading(true);
-      setApiKeys(MOCK_ROWS ?? (await ApiKeysApi.list()));
+      await new Promise(resolve => setTimeout(resolve, 1000)); // TODO: remove
+      setApiKeys(MOCK_ROWS ?? (await ApiKeysApi.list())); // TODO: remove mock
     } catch (e: any) {
       if (e && Object.hasOwn(e, "data")) {
         setError((e as { data: string }).data);
@@ -64,7 +65,8 @@ export const ManageApiKeys = () => {
     refreshList();
   }, [refreshList]);
 
-  const isTableEmpty = apiKeys?.length === 0;
+  const isTableVisible = !isLoading && !error;
+  const isShowingEmptyTable = isTableVisible && apiKeys.length === 0;
 
   return (
     <>
@@ -93,7 +95,7 @@ export const ManageApiKeys = () => {
         <Group align="end" position="apart">
           <Stack>
             <Title>{t`Manage API Keys`}</Title>
-            {!isTableEmpty && (
+            {!isShowingEmptyTable && (
               <Text color="text.1">{t`Allow users to use the API keys to authenticate their API calls.`}</Text>
             )}
           </Stack>
@@ -115,7 +117,7 @@ export const ManageApiKeys = () => {
               </tr>
             </thead>
             <tbody>
-              {apiKeys?.map(apiKey => (
+              {apiKeys.map(apiKey => (
                 <tr key={apiKey.id} className="border-bottom">
                   <td className="text-bold">{apiKey.name}</td>
                   <td>{apiKey.group_id}</td>
@@ -146,8 +148,13 @@ export const ManageApiKeys = () => {
               ))}
             </tbody>
           </table>
-          {isTableEmpty && (
-            <Stack h="40rem" align="center" justify="center" spacing="sm">
+          {isShowingEmptyTable && (
+            <Stack
+              h="40rem" // TODO: how to make this fill only available window height?
+              align="center"
+              justify="center"
+              spacing="sm"
+            >
               <Title>{t`No API keys here yet`}</Title>
               <Text color="text.1">{t`Create API keys to programmatically authenticate their API calls.`}</Text>
             </Stack>
