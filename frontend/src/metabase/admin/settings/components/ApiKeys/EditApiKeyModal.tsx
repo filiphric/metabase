@@ -7,14 +7,12 @@ import { Text, Button, Group, Modal, Stack } from "metabase/ui";
 import {
   Form,
   FormErrorMessage,
+  FormGroupWidget,
   FormProvider,
-  FormSelect,
   FormSubmitButton,
   FormTextInput,
 } from "metabase/forms";
 import { ApiKeysApi } from "metabase/services";
-
-import { useGroupListQuery } from "metabase/common/hooks";
 
 import { SecretKeyModal } from "./SecretKeyModal";
 
@@ -114,11 +112,6 @@ export const EditApiKeyModal = ({
     [onClose, refreshList],
   );
 
-  const { data: groups, isLoading } = useGroupListQuery();
-  if (isLoading || !groups) {
-    return null;
-  }
-
   if (modal === "secretKey") {
     return (
       <SecretKeyModal secretKey={secretKey} onClose={() => setModal("edit")} />
@@ -160,14 +153,10 @@ export const EditApiKeyModal = ({
                   required
                   withAsterisk={false}
                 />
-                <FormSelect
+                <FormGroupWidget
                   name="group_id"
                   label={t`Select a group to inherit its permissions`}
                   size="sm"
-                  data={groups.map(({ id, name }) => ({
-                    value: String(id),
-                    label: name,
-                  }))}
                 />
                 <FormTextInput
                   name="masked_key"

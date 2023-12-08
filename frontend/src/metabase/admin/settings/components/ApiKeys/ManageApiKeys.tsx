@@ -27,7 +27,7 @@ const MOCK_ROWS: ApiKey[] = [
   {
     name: "Production API Key",
     id: 2,
-    group_id: 1,
+    group_id: 2,
     group_name: "All Users",
     creator_id: 1,
     masked_key: "asdfasdfa",
@@ -108,7 +108,7 @@ export const ManageApiKeys = () => {
               <tr key={apiKey.id} className="border-bottom">
                 <td className="text-bold">{apiKey.name}</td>
                 <td>{apiKey.group_id}</td>
-                <td>{apiKey.masked_key}</td>
+                <td className="text-monospace">{apiKey.masked_key}</td>
                 <td>{apiKey.creator_id}</td>
                 <td>{apiKey.updated_at}</td>
                 <td>
