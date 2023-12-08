@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { t } from "ttag";
 
 import { isAdminGroup, isDefaultGroup } from "metabase/lib/groups";
@@ -9,7 +9,8 @@ import PaginationControls from "metabase/components/PaginationControls";
 
 import User from "metabase/entities/users";
 
-import type { Group, Member, User as IUser } from "metabase-types/api";
+import { ApiKeysApi } from "metabase/services";
+import type { ApiKey, Group, Member, User as IUser } from "metabase-types/api";
 import { PLUGIN_GROUP_MANAGERS } from "metabase/plugins";
 import type { State } from "metabase-types/store";
 import { isNotNull } from "metabase/lib/types";
@@ -56,6 +57,14 @@ function GroupMembersTable({
   onPreviousPage,
   reload,
 }: GroupMembersTableProps) {
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+
+  useEffect(() => {
+    ApiKeysApi.list().then((apiKeys: ApiKey[]) =>
+      setApiKeys(apiKeys.filter(apiKey => apiKey.group_id === group.id)),
+    );
+  }, [group.id]);
+
   // you can't remove people from Default and you can't remove the last user from Admin
   const isCurrentUser = ({ id }: Partial<IUser>) => id === currentUserId;
   const canRemove = (user: IUser) =>
@@ -96,6 +105,9 @@ function GroupMembersTable({
             onDone={handleAddUser}
           />
         )}
+        {apiKeys.map((apiKey: ApiKey) => {
+          // TODO: add <UserRow> or make an <ApiKeyRow> if necessary
+        })}
         {groupUsers.map((user: IUser) => {
           return (
             <UserRow
