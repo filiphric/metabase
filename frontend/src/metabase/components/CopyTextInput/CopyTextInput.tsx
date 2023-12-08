@@ -12,6 +12,7 @@ export const CopyTextInput = forwardRef(function CopyTextInput(
   return (
     <TextInput
       {...props}
+      ref={ref}
       rightSection={<CopyWidgetButton value={props.value} />}
       rightSectionWidth={40}
     />
