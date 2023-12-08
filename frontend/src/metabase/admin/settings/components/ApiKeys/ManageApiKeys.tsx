@@ -15,29 +15,6 @@ import { CreateApiKeyModal } from "./CreateApiKeyModal";
 import { EditApiKeyModal } from "./EditApiKeyModal";
 import { DeleteApiKeyModal } from "./DeleteApiKeyModal";
 
-const MOCK_ROWS: ApiKey[] = [
-  {
-    name: "Development API Key",
-    id: 1,
-    group_id: 1,
-    group_name: "All Users",
-    creator_id: 1,
-    masked_key: "asdfasdfa",
-    created_at: "2010 Aug 10",
-    updated_at: "2010 Aug 10",
-  },
-  {
-    name: "Production API Key",
-    id: 2,
-    group_id: 2,
-    group_name: "All Users",
-    creator_id: 1,
-    masked_key: "asdfasdfa",
-    created_at: "2010 Aug 10",
-    updated_at: "2010 Aug 10",
-  },
-];
-
 export const ManageApiKeys = () => {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
@@ -48,8 +25,8 @@ export const ManageApiKeys = () => {
   const refreshList = useCallback(async () => {
     try {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // TODO: remove
-      setApiKeys(MOCK_ROWS ?? (await ApiKeysApi.list())); // TODO: remove mock
+      const apiKeys = await ApiKeysApi.list();
+      setApiKeys(apiKeys);
     } catch (e: any) {
       if (e && Object.hasOwn(e, "data")) {
         setError((e as { data: string }).data);
