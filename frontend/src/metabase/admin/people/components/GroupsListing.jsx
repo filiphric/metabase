@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Component } from "react";
+import { Component, useState, useEffect } from "react";
 import { Link } from "react-router";
 
 import _ from "underscore";
@@ -14,6 +14,7 @@ import {
   getGroupNameLocalized,
 } from "metabase/lib/groups";
 import { KEYCODE_ENTER } from "metabase/lib/keyboard";
+import { ApiKeysApi } from "metabase/services";
 
 import { Icon } from "metabase/core/components/Icon";
 import Input from "metabase/core/components/Input";
@@ -147,6 +148,7 @@ function GroupRow({
   group,
   groupBeingEdited,
   index,
+  apiKeyCount,
   onEditGroupClicked,
   onDeleteGroupClicked,
   onEditGroupTextChange,
@@ -182,7 +184,16 @@ function GroupRow({
           <span className="ml2 text-bold">{getGroupNameLocalized(group)}</span>
         </Link>
       </td>
-      <td>{group.member_count || 0}</td>
+      <td>
+        {group.member_count || 0}
+        <span className="text-light">
+          {apiKeyCount === 1
+            ? t` (Including 1 API Key)`
+            : apiKeyCount > 1
+            ? t` (Including ${apiKeyCount} API Keys)`
+            : null}
+        </span>
+      </td>
       <td className="text-right">
         {showActionsButton ? (
           <ActionsPopover
@@ -218,6 +229,17 @@ function GroupsTable({
   onEditGroupCancelClicked,
   onEditGroupDoneClicked,
 }) {
+  const [apiKeys, setApiKeys] = useState([]);
+  const groupApiKeyCount = group =>
+    apiKeys.filter(apiKey => apiKey.group_id === group.id).length;
+
+  useEffect(() => {
+    // TODO: remove mock
+    const MOCK_API_KEYS = [{ group_id: 1 }, { group_id: 2 }, { group_id: 2 }];
+    setApiKeys(MOCK_API_KEYS);
+    ApiKeysApi.list().then(setApiKeys);
+  }, []);
+
   return (
     <AdminContentTable columnTitles={[t`Group name`, t`Members`]}>
       {showAddGroupRow ? (
@@ -234,6 +256,7 @@ function GroupsTable({
             key={group.id}
             group={group}
             index={index}
+            apiKeyCount={groupApiKeyCount(group)}
             groupBeingEdited={groupBeingEdited}
             onEditGroupClicked={onEditGroupClicked}
             onDeleteGroupClicked={onDeleteGroupClicked}
