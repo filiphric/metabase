@@ -32,7 +32,6 @@ const RegenerateKeyModal = ({
   refreshList: () => void;
 }) => {
   const handleRegenerate = useCallback(async () => {
-    // TODO: handle and display error
     const result = await ApiKeysApi.regenerate({ id: apiKey.id });
     setMaskedKey(result.masked_key);
     setSecretKey(result.unmasked_key);
@@ -48,40 +47,42 @@ const RegenerateKeyModal = ({
       onClose={() => setModal("edit")}
       title={t`Regenerate API key`}
     >
-      <Stack spacing="lg">
-        <Stack spacing="xs">
-          <Text
-            component="label"
-            weight="bold"
-            color="text.0"
-            size="sm"
-          >{t`Key name`}</Text>
-          <Text weight="bold" size="sm">
-            {apiKey.name}
-          </Text>
-        </Stack>
-        <Stack spacing="xs">
-          <Text
-            component="label"
-            weight="bold"
-            color="text.0"
-            size="sm"
-          >{t`Group`}</Text>
-          <Text weight="bold" size="sm">
-            {apiKey.group_name}
-          </Text>
-        </Stack>
-        <Text>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</Text>
-        <Group position="right">
-          <Button
-            onClick={() => setModal("edit")}
-          >{t`No, don’t regenerate`}</Button>
-          <Button
-            variant="filled"
-            onClick={handleRegenerate}
-          >{t`Regenerate`}</Button>
-        </Group>
-      </Stack>
+      <FormProvider initialValues={{}} onSubmit={handleRegenerate}>
+        <Form>
+          <Stack spacing="lg">
+            <Stack spacing="xs">
+              <Text
+                component="label"
+                weight="bold"
+                color="text.0"
+                size="sm"
+              >{t`Key name`}</Text>
+              <Text weight="bold" size="sm">
+                {apiKey.name}
+              </Text>
+            </Stack>
+            <Stack spacing="xs">
+              <Text
+                component="label"
+                weight="bold"
+                color="text.0"
+                size="sm"
+              >{t`Group`}</Text>
+              <Text weight="bold" size="sm">
+                {apiKey.group_name}
+              </Text>
+            </Stack>
+            <Text>{t`The existing API key will be deleted and cannot be recovered. It will be replaced with a new key.`}</Text>
+            <FormErrorMessage />
+            <Group position="right">
+              <Button
+                onClick={() => setModal("edit")}
+              >{t`No, don’t regenerate`}</Button>
+              <FormSubmitButton variant="filled" label={t`Regenerate`} />
+            </Group>
+          </Stack>
+        </Form>
+      </FormProvider>
     </Modal>
   );
 };
