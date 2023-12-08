@@ -188,9 +188,9 @@ function GroupRow({
         {group.member_count || 0}
         <span className="text-light">
           {apiKeyCount === 1
-            ? t` (Including 1 API Key)`
+            ? t` (Includes 1 API Key)`
             : apiKeyCount > 1
-            ? t` (Including ${apiKeyCount} API Keys)`
+            ? t` (Includes ${apiKeyCount} API Keys)`
             : null}
         </span>
       </td>
@@ -234,9 +234,6 @@ function GroupsTable({
     apiKeys.filter(apiKey => apiKey.group_id === group.id).length;
 
   useEffect(() => {
-    // TODO: remove mock
-    const MOCK_API_KEYS = [{ group_id: 1 }, { group_id: 2 }, { group_id: 2 }];
-    setApiKeys(MOCK_API_KEYS);
     ApiKeysApi.list().then(setApiKeys);
   }, []);
 
