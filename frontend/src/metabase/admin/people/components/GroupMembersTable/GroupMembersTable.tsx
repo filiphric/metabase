@@ -1,11 +1,13 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { t } from "ttag";
 
+import { Tooltip } from "metabase/ui";
 import { isAdminGroup, isDefaultGroup } from "metabase/lib/groups";
 import { getFullName } from "metabase/lib/user";
 import { Icon } from "metabase/core/components/Icon";
 import AdminContentTable from "metabase/components/AdminContentTable";
 import PaginationControls from "metabase/components/PaginationControls";
+import Link from "metabase/core/components/Link";
 
 import User from "metabase/entities/users";
 
@@ -105,9 +107,9 @@ function GroupMembersTable({
             onDone={handleAddUser}
           />
         )}
-        {apiKeys.map((apiKey: ApiKey) => {
-          // TODO: add <UserRow> or make an <ApiKeyRow> if necessary
-        })}
+        {apiKeys.map((apiKey: ApiKey) => (
+          <ApiKeyRow key={`apiKey-${apiKey.id}`} apiKey={apiKey} />
+        ))}
         {groupUsers.map((user: IUser) => {
           return (
             <UserRow
@@ -217,3 +219,22 @@ function getName(user: IUser): string {
 
   return name;
 }
+
+const ApiKeyRow = ({ apiKey }: { apiKey: ApiKey }) => {
+  return (
+    <tr>
+      <td className="text-bold">{apiKey.name}</td>
+      <td></td>
+      <td className="text-right">
+        <Link to="/admin/settings/authentication/api-keys">
+          <Tooltip
+            label={t`Manage API keys on Settings \\ Authentication page`}
+            position="left"
+          >
+            <Icon name="link" size={16} />
+          </Tooltip>
+        </Link>
+      </td>
+    </tr>
+  );
+};
