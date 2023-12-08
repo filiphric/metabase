@@ -41,9 +41,9 @@ export const ManageApiKeys = () => {
   const [modal, setModal] = useState<null | "create" | "edit" | "delete">(null);
   const [activeApiKey, setActiveApiKey] = useState<null | ApiKey>(null);
 
-  const refreshList = useCallback(() => {
+  const refreshList = useCallback(async () => {
     setApiKeys(MOCK_ROWS);
-    ApiKeysApi.list().then(setApiKeys);
+    setApiKeys(await ApiKeysApi.list());
   }, []);
 
   const handleClose = () => setModal(null);
