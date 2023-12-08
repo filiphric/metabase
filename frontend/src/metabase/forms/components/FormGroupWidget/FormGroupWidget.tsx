@@ -39,6 +39,8 @@ export const FormGroupWidget = forwardRef(function FormGroupWidget(
 
   const { data: groups, isLoading } = useGroupListQuery();
   if (isLoading || !groups) {
+    // TODO: display a disabled Select when loading?
+    // TODO: display error when group list query fails?
     return null;
   }
   const groupOptions = groups.map(({ id, name }) => ({
