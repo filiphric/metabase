@@ -15,6 +15,7 @@ import { isNotNull } from "metabase/lib/types";
 import { getMetricDisplayValueGetter } from "metabase/visualizations/echarts/cartesian/model/dataset";
 
 import { buildEChartsScatterSeries } from "../scatter/series";
+import { buildEChartsWaterfallSeries } from "../waterfall/series";
 import { getSeriesYAxisIndex } from "./utils";
 
 const buildEChartsLabelOptions = (
@@ -183,6 +184,12 @@ export const buildEChartsSeries = (
             chartModel.bubbleSizeDataKey,
             yAxisIndex,
             renderingContext,
+          );
+        case "waterfall":
+          return buildEChartsWaterfallSeries(
+            seriesModel,
+            chartModel.dimensionModel.dataKey,
+            yAxisIndex,
           );
       }
     })
