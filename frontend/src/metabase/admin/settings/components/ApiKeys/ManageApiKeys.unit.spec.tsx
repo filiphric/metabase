@@ -90,4 +90,35 @@ describe("ManageApiKeys", () => {
       ?.request?.json();
     expect(lastRequest).toEqual({});
   });
+  it("should edit API key", async () => {
+    setup();
+    const EDIT_URL = "path:/api/api-key/1";
+    fetchMock.put(EDIT_URL, 200);
+
+    userEvent.click(
+      within(
+        await screen.findByRole("row", {
+          name: /development api key/i,
+        }),
+      ).getByRole("img", { name: /pencil/i }),
+    );
+    await screen.findByText("Edit API Key");
+
+    const group = await screen.findByLabelText(
+      "Select a group to inherit its permissions",
+    );
+    userEvent.click(group);
+    userEvent.click(await screen.findByText("flamingos"));
+
+    const keyName = screen.getByLabelText("Key name");
+    userEvent.clear(keyName);
+    userEvent.type(keyName, "My Key");
+
+    userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Edit API Key")).not.toBeInTheDocument();
+    const lastRequest = await fetchMock
+      .lastCall(EDIT_URL, { method: "PUT" })
+      ?.request?.json();
+    expect(lastRequest).toEqual({ group_id: 5, name: "My Key" });
+  });
 });
