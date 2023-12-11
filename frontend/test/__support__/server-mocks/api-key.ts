@@ -4,5 +4,4 @@ import type { ApiKey } from "metabase-types/api";
 export function setupApiKeyEndpoints(apiKeys: ApiKey[]) {
   fetchMock.get("path:/api/api-key", apiKeys);
   fetchMock.post("path:/api/api-key", 200);
-  fetchMock.put("glob:/api/api-key/*", 200);
 }

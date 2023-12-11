@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import fetchMock from "fetch-mock";
 
-import { renderWithProviders, screen } from "__support__/ui";
+import { renderWithProviders, screen, within } from "__support__/ui";
 import {
   setupApiKeyEndpoints,
   setupGroupsEndpoint,
@@ -67,5 +67,27 @@ describe("ManageApiKeys", () => {
       .lastCall("path:/api/api-key", { method: "POST" })
       ?.request?.json();
     expect(lastRequest).toEqual({ name: "New key", group_id: 5 });
+  });
+  it("should regenerate an API key", async () => {
+    setup();
+    const REGEN_URL = "path:/api/api-key/1/regenerate";
+    fetchMock.put(REGEN_URL, 200);
+
+    userEvent.click(
+      within(
+        await screen.findByRole("row", {
+          name: /development api key/i,
+        }),
+      ).getByRole("img", { name: /pencil/i }),
+    );
+    await screen.findByText("Edit API Key");
+    userEvent.click(screen.getByRole("button", { name: "Regenerate API Key" }));
+    userEvent.click(await screen.findByRole("button", { name: "Regenerate" }));
+
+    await screen.findByText("Copy and save the API key");
+    const lastRequest = await fetchMock
+      .lastCall(REGEN_URL, { method: "PUT" })
+      ?.request?.json();
+    expect(lastRequest).toEqual({});
   });
 });
