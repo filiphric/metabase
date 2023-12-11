@@ -7,6 +7,7 @@ import cx from "classnames";
 
 import { t } from "ttag";
 import * as MetabaseAnalytics from "metabase/lib/analytics";
+import { Stack, Text, Group, Button } from "metabase/ui";
 import { color } from "metabase/lib/colors";
 import {
   isDefaultGroup,
@@ -57,32 +58,53 @@ function AddGroupRow({ text, onCancelClicked, onCreateClicked, onTextChange }) {
 
 // ------------------------------------------------------------ Groups Table: editing ------------------------------------------------------------
 
-function DeleteGroupModal({ group, onConfirm = () => {}, onClose = () => {} }) {
+function DeleteGroupModal({
+  group,
+  apiKeys,
+  onConfirm = () => {},
+  onClose = () => {},
+}) {
+  const hasApiKeys = apiKeys.length > 0;
   return (
-    <ModalContent title={t`Remove this group?`} onClose={onClose}>
-      <p className="px4 pb4">
-        {t`Are you sure? All members of this group will lose any permissions settings they have based on this group.
+    <ModalContent
+      title={
+        hasApiKeys
+          ? t`Are you sure you want remove this group and its API Key?`
+          : t`Remove this group?`
+      }
+      onClose={onClose}
+    >
+      <Stack spacing="xl">
+        <Text>
+          {hasApiKeys
+            ? t`All members of this group will lose any permissions settings they have based on this group, and its related API Keys will be deleted. You can move the API Key to another group.`
+            : t`Are you sure? All members of this group will lose any permissions settings they have based on this group.
                 This can't be undone.`}
-      </p>
-      <div className="Form-actions">
-        <button
-          className="Button Button--danger"
-          onClick={() => {
-            onClose();
-            onConfirm(group);
-          }}
-        >
-          {t`Yes`}
-        </button>
-        <button className="Button ml1" onClick={onClose}>
-          {t`No`}
-        </button>
-      </div>
+        </Text>
+        <Group spacing="md" position="right">
+          <Button onClick={onClose}>{hasApiKeys ? t`Cancel` : t`No`}</Button>
+          <Button
+            variant="filled"
+            color="error.0"
+            onClick={() => {
+              onClose();
+              onConfirm(group);
+            }}
+          >
+            {hasApiKeys ? t`Remove group and API Key` : t`Yes`}
+          </Button>
+        </Group>
+      </Stack>
     </ModalContent>
   );
 }
 
-function ActionsPopover({ group, onEditGroupClicked, onDeleteGroupClicked }) {
+function ActionsPopover({
+  group,
+  apiKeys,
+  onEditGroupClicked,
+  onDeleteGroupClicked,
+}) {
   return (
     <PopoverWithTrigger
       className="block"
@@ -96,7 +118,11 @@ function ActionsPopover({ group, onEditGroupClicked, onDeleteGroupClicked }) {
           as={DeleteModalTrigger}
           triggerElement={t`Remove Group`}
         >
-          <DeleteGroupModal group={group} onConfirm={onDeleteGroupClicked} />
+          <DeleteGroupModal
+            group={group}
+            apiKeys={apiKeys}
+            onConfirm={onDeleteGroupClicked}
+          />
         </ModalWithTrigger>
       </ul>
     </PopoverWithTrigger>
@@ -148,7 +174,7 @@ function GroupRow({
   group,
   groupBeingEdited,
   index,
-  apiKeyCount,
+  apiKeys,
   onEditGroupClicked,
   onDeleteGroupClicked,
   onEditGroupTextChange,
@@ -187,10 +213,10 @@ function GroupRow({
       <td>
         {group.member_count || 0}
         <span className="text-light">
-          {apiKeyCount === 1
+          {apiKeys.length === 1
             ? t` (Includes 1 API Key)`
-            : apiKeyCount > 1
-            ? t` (Includes ${apiKeyCount} API Keys)`
+            : apiKeys.length > 1
+            ? t` (Includes ${apiKeys.length} API Keys)`
             : null}
         </span>
       </td>
@@ -198,6 +224,7 @@ function GroupRow({
         {showActionsButton ? (
           <ActionsPopover
             group={group}
+            apiKeys={apiKeys}
             onEditGroupClicked={onEditGroupClicked}
             onDeleteGroupClicked={onDeleteGroupClicked}
           />
@@ -230,8 +257,6 @@ function GroupsTable({
   onEditGroupDoneClicked,
 }) {
   const [apiKeys, setApiKeys] = useState([]);
-  const groupApiKeyCount = group =>
-    apiKeys.filter(apiKey => apiKey.group_id === group.id).length;
 
   useEffect(() => {
     ApiKeysApi.list().then(setApiKeys);
@@ -253,7 +278,7 @@ function GroupsTable({
             key={group.id}
             group={group}
             index={index}
-            apiKeyCount={groupApiKeyCount(group)}
+            apiKeys={apiKeys.filter(apiKey => apiKey.group_id === group.id)}
             groupBeingEdited={groupBeingEdited}
             onEditGroupClicked={onEditGroupClicked}
             onDeleteGroupClicked={onDeleteGroupClicked}
