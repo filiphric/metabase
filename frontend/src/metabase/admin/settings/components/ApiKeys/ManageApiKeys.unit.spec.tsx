@@ -121,4 +121,27 @@ describe("ManageApiKeys", () => {
       ?.request?.json();
     expect(lastRequest).toEqual({ group_id: 5, name: "My Key" });
   });
+  it("should delete API key", async () => {
+    setup();
+    const DELETE_URL = "path:/api/api-key/1";
+    fetchMock.delete(DELETE_URL, 200);
+
+    userEvent.click(
+      within(
+        await screen.findByRole("row", {
+          name: /development api key/i,
+        }),
+      ).getByRole("img", { name: /trash/i }),
+    );
+    userEvent.click(
+      await screen.findByRole("button", { name: "Delete API Key" }),
+    );
+    expect(
+      await screen.findByRole("button", { name: "Delete API Key" }),
+    ).not.toBeInTheDocument();
+    const lastRequest = await fetchMock.lastCall(DELETE_URL, {
+      method: "DELETE",
+    });
+    expect(lastRequest).not.toBeUndefined();
+  });
 });
