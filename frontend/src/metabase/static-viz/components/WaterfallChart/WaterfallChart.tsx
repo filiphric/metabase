@@ -2,10 +2,10 @@ import { init } from "echarts";
 import { Group } from "@visx/group";
 
 import { getCartesianChartModel } from "metabase/visualizations/echarts/cartesian/model";
-import { getCartesianChartOption } from "metabase/visualizations/echarts/cartesian/option";
 import { sanitizeSvgForBatik } from "metabase/static-viz/lib/svg";
 import type { IsomorphicStaticChartProps } from "metabase/static-viz/containers/IsomorphicStaticChart/types";
 import { getLegendItems } from "metabase/visualizations/echarts/cartesian/model/legend";
+import { getWaterfallOption } from "metabase/visualizations/echarts/cartesian/waterfall/option";
 
 import { calculateLegendRows } from "../Legend/utils";
 import { Legend } from "../Legend";
@@ -40,7 +40,7 @@ export function WaterfallChart({
   const { height: legendHeight, items: legendLayoutItems } =
     calculateLegendRows(legendItems, width, LEGEND_PADDING, LEGEND_PADDING);
 
-  const option = getCartesianChartOption(
+  const option = getWaterfallOption(
     chartModel,
     computedVisualizationSettings,
     renderingContext,
