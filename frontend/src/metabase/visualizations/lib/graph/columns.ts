@@ -60,6 +60,16 @@ export type CartesianChartColumns =
   | BreakoutChartColumns
   | MultipleMetricsChartColumns;
 
+export function assertMultiMetricColumns(
+  chartColumns: CartesianChartColumns,
+): MultipleMetricsChartColumns {
+  if (Object.keys(chartColumns).includes("breakout")) {
+    throw Error("Given `chartColumns` has breakout");
+  }
+
+  return chartColumns as MultipleMetricsChartColumns;
+}
+
 export const getCartesianChartColumns = (
   columns: RemappingHydratedDatasetColumn[],
   settings: Pick<VisualizationSettings, "graph.dimensions" | "graph.metrics">,
