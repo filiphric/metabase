@@ -1,4 +1,5 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import type { EChartsType } from "echarts";
 import type * as React from "react";
 import { color } from "metabase/lib/colors";
 import { formatValue } from "metabase/lib/formatting/value";
@@ -20,6 +21,7 @@ import type { EChartsEventHandler } from "metabase/visualizations/types/echarts"
 import {
   getEventColumnsData,
   getEventDimensionsData,
+  getStackedTooltipModel,
 } from "metabase/visualizations/visualizations/CartesianChart/utils";
 
 export function CartesianChart({
@@ -33,10 +35,13 @@ export function CartesianChart({
   actionButtons,
   isQueryBuilder,
   isFullscreen,
+  hovered,
   visualizationIsClickable,
+  onHoverChange,
   onVisualizationClick,
   onChangeCardAndRun,
 }: VisualizationProps) {
+  const chartRef = useRef<EChartsType>();
   const hasTitle = showTitle && settings["card.title"];
   const title = settings["card.title"] || card.name;
   const description = settings["card.description"];
@@ -76,6 +81,52 @@ export function CartesianChart({
   const eventHandlers: EChartsEventHandler[] = useMemo(
     () => [
       {
+        eventName: "mouseout",
+        query: "series",
+        handler: () => {
+          onHoverChange?.(null);
+        },
+      },
+      {
+        eventName: "mousemove",
+        query: "series",
+        handler: event => {
+          const { dataIndex, seriesId, seriesIndex } = event;
+          if (seriesIndex == null) {
+            return;
+          }
+
+          const data = getEventColumnsData(chartModel, seriesIndex, dataIndex);
+
+          // TODO: For some reason ECharts sometimes trigger series mouse move element with the root SVG as target
+          // Find a better fix
+          if (event.event.event.target.nodeName === "svg") {
+            return;
+          }
+
+          const isStackedChart = settings["stackable.stack_type"] != null;
+          const stackedTooltipModel = isStackedChart
+            ? getStackedTooltipModel(
+                chartModel,
+                settings,
+                seriesIndex,
+                dataIndex,
+              )
+            : undefined;
+
+          onHoverChange?.({
+            settings,
+            index: seriesIndex,
+            datumIndex: dataIndex,
+            seriesId,
+            event: event.event.event,
+            element: dataIndex != null ? event.event.event.target : null,
+            data,
+            stackedTooltipModel,
+          });
+        },
+      },
+      {
         eventName: "click",
         handler: event => {
           const { seriesIndex, dataIndex } = event;
@@ -112,12 +163,44 @@ export function CartesianChart({
     ],
     [
       chartModel,
+      onHoverChange,
       onVisualizationClick,
       openQuestion,
       settings,
       visualizationIsClickable,
     ],
   );
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) {
+      return;
+    }
+
+    if (!hovered) {
+      return;
+    }
+
+    const { datumIndex, index } = hovered;
+
+    chart.dispatchAction({
+      type: "highlight",
+      dataIndex: datumIndex,
+      seriesIndex: index,
+    });
+
+    return () => {
+      chart.dispatchAction({
+        type: "downplay",
+        dataIndex: datumIndex,
+        seriesIndex: index,
+      });
+    };
+  }, [hovered]);
+
+  const handleInit = useCallback((chart: EChartsType) => {
+    chartRef.current = chart;
+  }, []);
 
   const handleSelectSeries = useCallback(
     (event: React.MouseEvent, seriesIndex: number) => {
@@ -175,11 +258,17 @@ export function CartesianChart({
         labels={legendItems.map(item => item.name)}
         colors={legendItems.map(item => item.color)}
         actionButtons={!hasTitle ? actionButtons : undefined}
+        hovered={hovered}
         isFullscreen={isFullscreen}
         isQueryBuilder={isQueryBuilder}
         onSelectSeries={handleSelectSeries}
+        onHoverChange={onHoverChange}
       >
-        <CartesianChartRenderer option={option} eventHandlers={eventHandlers} />
+        <CartesianChartRenderer
+          option={option}
+          eventHandlers={eventHandlers}
+          onInit={handleInit}
+        />
       </CartesianChartLegendLayout>
     </CartesianChartRoot>
   );
