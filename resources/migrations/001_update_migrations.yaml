@@ -4325,6 +4325,22 @@ databaseChangeLog:
                     nullable: true
                   remarks: 'If the database supports indexing, this column indicate whether or not a field is indexed, or is the 1st column in a composite index'
 
+  - changeSet:
+      id: v49.00-010
+      author: johnswanson
+      comment: Add a name to API Keys
+      changes:
+        - addColumn:
+            tableName: api_key
+            columns:
+              - column:
+                  name: name
+                  type: varchar(254)
+                  constraints:
+                    nullable: false
+                    unique: true
+                  remarks: 'The user-defined name of the API key.'
+
   # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
 
 
