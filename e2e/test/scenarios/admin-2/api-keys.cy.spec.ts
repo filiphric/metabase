@@ -6,9 +6,26 @@ describe("scenarios > admin > settings > API keys", () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     cy.signInAsAdmin();
-    cy.visit("/admin/settings/authentication");
   });
 
+  it("should show number of API keys on auth card", () => {
+    cy.intercept("GET", "/api/api-key/count", req => {
+      req.reply(200, "5");
+    });
+    cy.visit("/admin/settings/authentication");
+    getApiKeysCard().within(() => {
+      cy.findByText("5 API Keys").should("be.visible");
+    });
+  });
+  it("should show not show number of API keys on auth card when none exist", () => {
+    cy.intercept("GET", "/api/api-key/count", req => {
+      req.reply(200, "0");
+    });
+    cy.visit("/admin/settings/authentication");
+    getApiKeysCard().within(() => {
+      cy.findByText("0 API Keys").should("not.exist");
+    });
+  });
   it("should allow creating an API key", () => {
     //
   });
@@ -21,4 +38,16 @@ describe("scenarios > admin > settings > API keys", () => {
   it("should allow  an API key", () => {
     //
   });
+  it("should be notified when deleting a group with API keys", () => {
+    //
+  });
+  it("should show API keys when viewing Group details", () => {
+    //
+  });
+  it("should show when a question was last edited by an API key", () => {
+    //
+  });
 });
+const getApiKeysCard = () => {
+  return cy.findByText("API Keys").parent().parent();
+};
