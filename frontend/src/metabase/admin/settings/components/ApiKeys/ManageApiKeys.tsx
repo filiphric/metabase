@@ -82,7 +82,10 @@ export const ManageApiKeys = () => {
           >{t`Create API Key`}</Button>
         </Group>
         <LoadingAndErrorWrapper loading={isLoading} error={error}>
-          <table className="ContentTable border-bottom">
+          <table
+            className="ContentTable border-bottom"
+            data-testid="api-keys-table"
+          >
             <thead>
               <tr>
                 <th>{t`Key name`}</th>

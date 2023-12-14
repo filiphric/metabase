@@ -1,5 +1,28 @@
 import { restore } from "e2e/support/helpers";
 
+const MOCK_ROWS = [
+  {
+    name: "Development API Key",
+    id: 1,
+    group_id: 1,
+    group_name: "All Users",
+    creator_id: 1,
+    masked_key: "asdfasdfa",
+    created_at: "2010 Aug 10",
+    updated_at: "2010 Aug 10",
+  },
+  {
+    name: "Production API Key",
+    id: 2,
+    group_id: 2,
+    group_name: "All Users",
+    creator_id: 1,
+    masked_key: "asdfasdfa",
+    created_at: "2010 Aug 10",
+    updated_at: "2010 Aug 10",
+  },
+];
+
 describe("scenarios > admin > settings > API keys", () => {
   beforeEach(() => {
     restore();
@@ -7,6 +30,7 @@ describe("scenarios > admin > settings > API keys", () => {
     // @ts-ignore
     cy.signInAsAdmin();
   });
+  // TODO: replace intercepts below with actual requests to test backend
 
   it("should show number of API keys on auth card", () => {
     cy.intercept("GET", "/api/api-key/count", req => req.reply(200, "5"));
@@ -24,6 +48,12 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.intercept("GET", "/api/api-key/count", req => req.reply(200, "0"));
     cy.reload();
     getApiKeysCard().findByTestId("card-badge").should("not.exist");
+  });
+  it("should list existing API keys", () => {
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, MOCK_ROWS));
+    cy.visit("/admin/settings/authentication/api-keys");
+    getApiKeysRows().contains("Development API Key").should("exist");
+    getApiKeysRows().contains("Production API Key").should("exist");
   });
   it("should allow creating an API key", () => {
     //
@@ -44,6 +74,7 @@ describe("scenarios > admin > settings > API keys", () => {
     //
   });
 });
-const getApiKeysCard = () => {
-  return cy.findByText("API Keys").parent().parent();
-};
+const getApiKeysCard = () => cy.findByText("API Keys").parent().parent();
+
+const getApiKeysRows = () =>
+  cy.findByTestId("api-keys-table").find("tbody > tr");
