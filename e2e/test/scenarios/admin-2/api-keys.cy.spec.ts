@@ -1,4 +1,5 @@
 import { restore } from "e2e/support/helpers";
+import type { ApiKey } from "metabase-types/api";
 
 const MOCK_ROWS = [
   {
@@ -24,8 +25,10 @@ const MOCK_ROWS = [
 ];
 
 describe("scenarios > admin > settings > API keys", () => {
+  let mockRows: ApiKey[] = [];
   beforeEach(() => {
     restore();
+    mockRows = [...MOCK_ROWS];
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     cy.signInAsAdmin();
@@ -52,16 +55,16 @@ describe("scenarios > admin > settings > API keys", () => {
   it("should list existing API keys", () => {
     cy.intercept("GET", "/api/api-key", req => req.reply(200, MOCK_ROWS));
     cy.visit("/admin/settings/authentication/api-keys");
-    getApiKeysRows().contains("Development API Key").should("exist");
-    getApiKeysRows().contains("Production API Key").should("exist");
+    getApiKeysRows()
+      .should("contain", "Development API Key")
+      .and("contain", "Production API Key");
   });
   it("should allow creating an API key", () => {
-    const myRows = [...MOCK_ROWS];
-    cy.intercept("GET", "/api/api-key", req => req.reply(200, myRows)).as(
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
       "fetchKeys",
     );
     cy.intercept("POST", "/api/api-key", req => {
-      myRows.push(req.body);
+      mockRows.push(req.body);
       req.reply(200);
     });
 
@@ -79,12 +82,12 @@ describe("scenarios > admin > settings > API keys", () => {
     getApiKeysRows().contains("New key").should("exist");
   });
   it("should allow deleting an API key", () => {
-    let myRows = [...MOCK_ROWS];
-    cy.intercept("GET", "/api/api-key", req => req.reply(200, myRows)).as(
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
       "fetchKeys",
     );
-    cy.intercept("DELETE", "/api/api-key/1", req => {
-      myRows = myRows.filter(row => row.id !== 1);
+    cy.intercept("DELETE", "/api/api-key/*", req => {
+      const id = parseInt(req.url.match(/api-key\/(\d+)/)?.[1] ?? "", 10);
+      mockRows = mockRows.filter(row => row.id !== id);
       req.reply(200);
     }).as("deleteKey");
     cy.visit("/admin/settings/authentication/api-keys");
@@ -97,9 +100,9 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.button("Delete API Key").click();
     cy.wait("@deleteKey");
     cy.wait("@fetchKeys");
-    getApiKeysRows().contains("Development API Key").should("not.exist");
+    getApiKeysRows().should("not.contain", "Development API Key");
     cy.reload();
-    getApiKeysRows().contains("Development API Key").should("not.exist");
+    getApiKeysRows().should("not.contain", "Development API Key");
   });
   it("should allow editing an API key", () => {
     //
