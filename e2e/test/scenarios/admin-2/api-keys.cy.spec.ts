@@ -56,20 +56,50 @@ describe("scenarios > admin > settings > API keys", () => {
     getApiKeysRows().contains("Production API Key").should("exist");
   });
   it("should allow creating an API key", () => {
+    const myRows = [...MOCK_ROWS];
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, myRows)).as(
+      "fetchKeys",
+    );
+    cy.intercept("POST", "/api/api-key", req => {
+      myRows.push(req.body);
+      req.reply(200);
+    });
+
     cy.visit("/admin/settings/authentication/api-keys");
+    cy.wait("@fetchKeys");
     cy.button("Create API Key").click();
     cy.findByLabelText(/Key name/).type("New key");
     cy.findByLabelText(/Select a group/).click();
     cy.findByRole("listbox").findByText("Administrators").click();
-    cy.intercept("POST", "/api/api-key", req => req.reply(200));
     cy.button("Create").click();
-    cy.intercept("GET", "/api/api-key").as("fetchKeys");
-    cy.button("Done").click();
     cy.wait("@fetchKeys");
-    // TODO: ensure API keys shows up in list
+    cy.button("Done").click();
+    getApiKeysRows().contains("New key").should("exist");
+    cy.reload();
+    getApiKeysRows().contains("New key").should("exist");
   });
   it("should allow deleting an API key", () => {
-    //
+    let myRows = [...MOCK_ROWS];
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, myRows)).as(
+      "fetchKeys",
+    );
+    cy.intercept("DELETE", "/api/api-key/1", req => {
+      myRows = myRows.filter(row => row.id !== 1);
+      req.reply(200);
+    }).as("deleteKey");
+    cy.visit("/admin/settings/authentication/api-keys");
+    cy.wait("@fetchKeys");
+    getApiKeysRows()
+      .contains("Development API Key")
+      .closest("tr")
+      .icon("trash")
+      .click();
+    cy.button("Delete API Key").click();
+    cy.wait("@deleteKey");
+    cy.wait("@fetchKeys");
+    getApiKeysRows().contains("Development API Key").should("not.exist");
+    cy.reload();
+    getApiKeysRows().contains("Development API Key").should("not.exist");
   });
   it("should allow editing an API key", () => {
     //
