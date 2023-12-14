@@ -56,7 +56,13 @@ describe("scenarios > admin > settings > API keys", () => {
     getApiKeysRows().contains("Production API Key").should("exist");
   });
   it("should allow creating an API key", () => {
-    //
+    // TODO: intercept POST /api/api-key
+    cy.visit("/admin/settings/authentication/api-keys");
+    cy.button("Create API Key").click();
+    cy.findByLabelText(/Key name/).type("New key");
+    cy.findByLabelText(/Select a group/).click();
+    cy.findByRole("listbox").findByText("Administrators").click();
+    cy.button("Create").click();
   });
   it("should allow deleting an API key", () => {
     //
