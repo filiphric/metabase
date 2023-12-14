@@ -24,7 +24,7 @@ export const ApiKeysAuthCard = () => {
       <CardHeader>
         <CardTitle>{t`API Keys`}</CardTitle>
         {isConfigured && (
-          <CardBadge isEnabled>
+          <CardBadge isEnabled data-testid="card-badge">
             {keyCount === 1 ? t`1 API Key` : t`${keyCount} API Keys`}
           </CardBadge>
         )}

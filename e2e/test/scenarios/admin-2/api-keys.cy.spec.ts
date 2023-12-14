@@ -9,22 +9,21 @@ describe("scenarios > admin > settings > API keys", () => {
   });
 
   it("should show number of API keys on auth card", () => {
-    cy.intercept("GET", "/api/api-key/count", req => {
-      req.reply(200, "5");
-    });
+    cy.intercept("GET", "/api/api-key/count", req => req.reply(200, "5"));
     cy.visit("/admin/settings/authentication");
-    getApiKeysCard().within(() => {
-      cy.findByText("5 API Keys").should("be.visible");
-    });
-  });
-  it("should show not show number of API keys on auth card when none exist", () => {
-    cy.intercept("GET", "/api/api-key/count", req => {
-      req.reply(200, "0");
-    });
-    cy.visit("/admin/settings/authentication");
-    getApiKeysCard().within(() => {
-      cy.findByText("0 API Keys").should("not.exist");
-    });
+    getApiKeysCard()
+      .findByTestId("card-badge")
+      .should("have.text", "5 API Keys");
+
+    cy.intercept("GET", "/api/api-key/count", req => req.reply(200, "1"));
+    cy.reload();
+    getApiKeysCard()
+      .findByTestId("card-badge")
+      .should("have.text", "1 API Key");
+
+    cy.intercept("GET", "/api/api-key/count", req => req.reply(200, "0"));
+    cy.reload();
+    getApiKeysCard().findByTestId("card-badge").should("not.exist");
   });
   it("should allow creating an API key", () => {
     //
@@ -33,9 +32,6 @@ describe("scenarios > admin > settings > API keys", () => {
     //
   });
   it("should allow editing an API key", () => {
-    //
-  });
-  it("should allow  an API key", () => {
     //
   });
   it("should be notified when deleting a group with API keys", () => {
