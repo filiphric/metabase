@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
 import { Component, useState, useEffect } from "react";
-import { Link } from "react-router";
 
 import _ from "underscore";
 import cx from "classnames";
 
-import { t } from "ttag";
+import { jt, t } from "ttag";
+import Link from "metabase/core/components/Link";
 import * as MetabaseAnalytics from "metabase/lib/analytics";
 import { Stack, Text, Group, Button } from "metabase/ui";
 import { color } from "metabase/lib/colors";
@@ -64,20 +64,28 @@ function DeleteGroupModal({
   onConfirm = () => {},
   onClose = () => {},
 }) {
-  const hasApiKeys = apiKeys.length > 0;
+  const numApiKeys = apiKeys.length;
+  const hasApiKeys = numApiKeys > 0;
   return (
     <ModalContent
       title={
-        hasApiKeys
+        numApiKeys === 0
+          ? t`Remove this group?`
+          : numApiKeys === 1
           ? t`Are you sure you want remove this group and its API Key?`
-          : t`Remove this group?`
+          : t`Are you sure you want remove this group and its API Keys?`
       }
       onClose={onClose}
     >
       <Stack spacing="xl">
         <Text>
           {hasApiKeys
-            ? t`All members of this group will lose any permissions settings they have based on this group, and its related API Keys will be deleted. You can move the API Key to another group.`
+            ? jt`All members of this group will lose any permissions settings they have based on this group, and its related API Keys will be deleted. You can ${(
+                <Link
+                  to="/admin/settings/authentication/api-keys"
+                  variant="brand"
+                >{t`move the API Keys to another group`}</Link>
+              )}.`
             : t`Are you sure? All members of this group will lose any permissions settings they have based on this group.
                 This can't be undone.`}
         </Text>
