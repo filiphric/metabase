@@ -1,9 +1,9 @@
 import type { CyHttpMessages } from "cypress/types/net-stubbing";
 
-import { restore } from "e2e/support/helpers";
+import { popover, restore } from "e2e/support/helpers";
 import type { ApiKey } from "metabase-types/api";
 
-const MOCK_ROWS = [
+const MOCK_ROWS: ApiKey[] = [
   {
     name: "Development API Key",
     id: 1,
@@ -18,7 +18,17 @@ const MOCK_ROWS = [
     name: "Production API Key",
     id: 2,
     group_id: 2,
-    group_name: "All Users",
+    group_name: "Administrators",
+    creator_id: 1,
+    masked_key: "asdfasdfa",
+    created_at: "2010 Aug 10",
+    updated_at: "2010 Aug 10",
+  },
+  {
+    name: "Personal API Key",
+    id: 3,
+    group_id: 3,
+    group_name: "collection",
     creator_id: 1,
     masked_key: "asdfasdfa",
     created_at: "2010 Aug 10",
@@ -92,6 +102,7 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.reload();
     getApiKeysCard().findByTestId("card-badge").should("not.exist");
   });
+
   it("should list existing API keys", () => {
     cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows));
     cy.visit("/admin/settings/authentication/api-keys");
@@ -99,6 +110,7 @@ describe("scenarios > admin > settings > API keys", () => {
       .should("contain", "Development API Key")
       .and("contain", "Production API Key");
   });
+
   it("should allow creating an API key", () => {
     cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
       "fetchKeys",
@@ -121,6 +133,7 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.reload();
     getApiKeysRows().contains("New key").should("exist");
   });
+
   it("should allow deleting an API key", () => {
     cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
       "fetchKeys",
@@ -144,6 +157,7 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.reload();
     getApiKeysRows().should("not.contain", "Development API Key");
   });
+
   it("should allow editing an API key", () => {
     cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
       "fetchKeys",
@@ -188,14 +202,43 @@ describe("scenarios > admin > settings > API keys", () => {
       .closest("tr")
       .should("contain", "collection");
   });
-  it("should be notified when deleting a group with API keys", () => {
-    //
+
+  it("should warn before deleting a group with API keys", () => {
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
+      "fetchKeys",
+    );
+    cy.visit("/admin/people/groups");
+    cy.wait("@fetchKeys");
+    cy.get(".ContentTable")
+      .contains("collection")
+      .closest("tr")
+      .should("contain", "(Includes 1 API Key")
+      .icon("ellipsis")
+      .click();
+    popover().findByText("Remove Group").click();
+    cy.get(".Modal")
+      .findByText(/move the API Keys/)
+      .click();
+    cy.url().should("match", /\/admin\/settings\/authentication\/api-keys$/);
   });
+
   it("should show API keys when viewing Group details", () => {
-    //
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
+      "fetchKeys",
+    );
+    cy.visit("/admin/people/groups/3");
+    cy.wait("@fetchKeys");
+    cy.get(".ContentTable")
+      .findByText("Personal API Key")
+      .closest("tr")
+      .icon("link")
+      .trigger("mouseover") // FIXME: this simulated hover event doesn’t trigger the tooltip
+      .click();
+    cy.url().should("match", /\/admin\/settings\/authentication\/api-keys$/);
   });
+
   it("should show when a question was last edited by an API key", () => {
-    //
+    // TODO: write this when backend is ready
   });
 });
 const getApiKeysCard = () => cy.findByText("API Keys").parent().parent();
