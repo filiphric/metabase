@@ -100,7 +100,7 @@ export const ManageApiKeys = () => {
               {apiKeys.map(apiKey => (
                 <tr key={apiKey.id} className="border-bottom">
                   <td className="text-bold">{apiKey.name}</td>
-                  <td>{apiKey.group_id}</td>
+                  <td>{apiKey.group_name}</td>
                   <td className="text-monospace">{apiKey.masked_key}</td>
                   <td>{apiKey.creator_id}</td>
                   <td>{apiKey.updated_at}</td>

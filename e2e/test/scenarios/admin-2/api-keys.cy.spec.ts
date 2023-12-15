@@ -1,3 +1,5 @@
+import type { CyHttpMessages } from "cypress/types/net-stubbing";
+
 import { restore } from "e2e/support/helpers";
 import type { ApiKey } from "metabase-types/api";
 
@@ -24,7 +26,41 @@ const MOCK_ROWS = [
   },
 ];
 
-const getRequestId = req =>
+const MOCK_GROUPS = [
+  // NOTE: this is only here temporarily (remove when backend is working)
+  {
+    id: 2,
+    name: "Administrators",
+    member_count: 1,
+  },
+  {
+    id: 1,
+    name: "All Users",
+    member_count: 9,
+  },
+  {
+    id: 3,
+    name: "collection",
+    member_count: 4,
+  },
+  {
+    id: 4,
+    name: "data",
+    member_count: 2,
+  },
+  {
+    id: 6,
+    name: "nosql",
+    member_count: 1,
+  },
+  {
+    id: 5,
+    name: "readonly",
+    member_count: 1,
+  },
+];
+
+const getRequestId = (req: CyHttpMessages.IncomingHttpRequest) =>
   parseInt(req.url.match(/api-key\/(\d+)/)?.[1] ?? "", 10);
 
 describe("scenarios > admin > settings > API keys", () => {
@@ -116,7 +152,15 @@ describe("scenarios > admin > settings > API keys", () => {
       const id = getRequestId(req);
       const rowI = mockRows.findIndex(row => row.id === id);
       const row = mockRows[rowI];
-      mockRows[rowI] = { ...row, ...req.body };
+      const groupName = MOCK_GROUPS.find(
+        group => group.id === req.body.group_id,
+      )?.name;
+      console.log({ groupName, req });
+      mockRows[rowI] = {
+        ...row,
+        ...req.body,
+        group_name: groupName,
+      };
       req.reply(200);
     }).as("saveKey");
     cy.visit("/admin/settings/authentication/api-keys");
@@ -129,16 +173,21 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.findByLabelText(/Key name/)
       .clear()
       .type("Different key name");
+    cy.findByLabelText(/Select a group/).click();
+    cy.findByRole("listbox").findByText("collection").click();
     cy.button("Save").click();
     cy.wait("@saveKey");
     cy.wait("@fetchKeys");
     getApiKeysRows()
       .should("not.contain", "Development API Key")
-      .and("contain", "Different key name");
+      .contains("Different key name")
+      .closest("tr")
+      .should("contain", "collection");
     cy.reload();
     getApiKeysRows()
-      .should("not.contain", "Development API Key")
-      .and("contain", "Different key name");
+      .contains("Different key name")
+      .closest("tr")
+      .should("contain", "collection");
   });
   it("should be notified when deleting a group with API keys", () => {
     //
