@@ -114,9 +114,7 @@ export const EditApiKeyModal = ({
   );
 
   if (modal === "secretKey") {
-    return (
-      <SecretKeyModal secretKey={secretKey} onClose={() => setModal("edit")} />
-    );
+    return <SecretKeyModal secretKey={secretKey} onClose={onClose} />;
   }
 
   if (modal === "regenerate") {

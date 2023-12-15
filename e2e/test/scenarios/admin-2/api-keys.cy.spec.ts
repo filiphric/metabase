@@ -204,6 +204,47 @@ describe("scenarios > admin > settings > API keys", () => {
       .should("contain", "collection");
   });
 
+  it("should allow regenerating an API key", () => {
+    cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
+      "fetchKeys",
+    );
+    cy.intercept("PUT", "/api/api-key/*/regenerate", req => {
+      const id = getRequestId(req);
+      const rowI = mockRows.findIndex(row => row.id === id);
+      const masked_key = "qwerty";
+      const unmasked_key = "qwertyuiop";
+      mockRows[rowI] = {
+        ...mockRows[rowI],
+        masked_key: "qwerty",
+      };
+      req.reply(200, { masked_key, unmasked_key });
+    }).as("regenKey");
+    cy.visit("/admin/settings/authentication/api-keys");
+    cy.wait("@fetchKeys");
+    getApiKeysRows()
+      .contains("Personal API Key")
+      .closest("tr")
+      .icon("pencil")
+      .click();
+    cy.button("Regenerate API Key").click();
+    cy.button("Regenerate").click();
+    cy.wait("@regenKey");
+    cy.findByLabelText("The API key").should("have.value", "qwertyuiop");
+    cy.wait("@fetchKeys");
+    cy.button("Done").click();
+    getApiKeysRows()
+      .contains("Personal API Key")
+      .closest("tr")
+      .should("contain", "qwerty")
+      .and("not.contain", "qwertyuiop");
+    cy.reload();
+    getApiKeysRows()
+      .contains("Personal API Key")
+      .closest("tr")
+      .should("contain", "qwerty")
+      .and("not.contain", "qwertyuiop");
+  });
+
   it("should warn before deleting a group with API keys", () => {
     cy.intercept("GET", "/api/api-key", req => req.reply(200, mockRows)).as(
       "fetchKeys",
