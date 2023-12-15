@@ -4,17 +4,14 @@ import { PublicLinkCopyPanel } from "metabase/dashboard/components/PublicLinkPop
 import { useSelector } from "metabase/lib/redux";
 import { getSetting } from "metabase/selectors/settings";
 import { SharingPaneButton } from "metabase/public/components/widgets/SharingPane/SharingPaneButton/SharingPaneButton";
-import {
-  PublicEmbedIconWrapper,
-  SharingPaneActionButton,
-  StaticEmbedIconWrapper,
-} from "metabase/public/components/widgets/SharingPane/SharingPaneButton/SharingPaneButton.styled";
-import { Group, Text, Anchor } from "metabase/ui";
+import { SharingPaneActionButton } from "metabase/public/components/widgets/SharingPane/SharingPaneButton/SharingPaneButton.styled";
+import { Group, Text, Anchor, Box } from "metabase/ui";
 
 import { getPublicEmbedHTML } from "metabase/public/lib/code";
 
 import * as MetabaseAnalytics from "metabase/lib/analytics";
 import Link from "metabase/core/components/Link";
+import { PublicEmbedIcon, StaticEmbedIcon } from "./icons";
 
 export type Resource = Dashboard | Card;
 
@@ -64,15 +61,22 @@ function SharingPane({
     onDeletePublicLink();
   };
 
+  const publicLinkInfoText = hasPublicLink ? (
+    //   TextInput has a hardcoded marginTop that we need to account for here.
+    <Box mb="-0.25rem">{t`Just copy this snippet to add a publicly-visible iframe embed to your web page or blog post.`}</Box>
+  ) : (
+    t`Use this to add a publicly-visible iframe embed to your web page or blog post.`
+  );
+
   return (
-    <Group p="lg" data-testid="sharing-pane-container">
+    <Group p="lg">
       <SharingPaneButton
         header={t`Static embed`}
         description={t`Securely embed this dashboard in your own application’s server code.`}
-        illustration={<StaticEmbedIconWrapper />}
+        illustration={<StaticEmbedIcon />}
+        onClick={() => onChangeEmbedType("application")}
       >
         <SharingPaneActionButton
-          data-testid="sharing-pane-static-embed-button"
           fullWidth
           onClick={() => onChangeEmbedType("application")}
         >
@@ -82,26 +86,21 @@ function SharingPane({
 
       <SharingPaneButton
         header={t`Public embed`}
-        disabled={!isPublicSharingEnabled}
         description={
           isPublicSharingEnabled ? (
-            hasPublicLink ? (
-              t`Just copy this snippet to add a publicly-visible iframe embed to your web page or blog post.`
-            ) : (
-              t`Use this to add a publicly-visible iframe embed to your web page or blog post.`
-            )
+            publicLinkInfoText
           ) : (
-            <>
-              <Text>
-                {t`Public embeds and links are disabled.`}{" "}
-                <Link to="/admin/settings/public-sharing">
-                  <Anchor data-testid="sharing-pane-settings-link">{t`Settings`}</Anchor>
-                </Link>
-              </Text>
-            </>
+            <Text>
+              {t`Public embeds and links are disabled.`}{" "}
+              <Link to="/admin/settings/public-sharing">
+                <Anchor data-testid="sharing-pane-settings-link">{t`Settings`}</Anchor>
+              </Link>
+            </Text>
           )
         }
-        illustration={<PublicEmbedIconWrapper />}
+        disabled={!isPublicSharingEnabled}
+        onClick={createPublicLink}
+        illustration={<PublicEmbedIcon disabled={!isPublicSharingEnabled} />}
       >
         {resource.public_uuid ? (
           <PublicLinkCopyPanel
