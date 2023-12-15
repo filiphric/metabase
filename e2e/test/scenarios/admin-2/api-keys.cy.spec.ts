@@ -155,7 +155,6 @@ describe("scenarios > admin > settings > API keys", () => {
       const groupName = MOCK_GROUPS.find(
         group => group.id === req.body.group_id,
       )?.name;
-      console.log({ groupName, req });
       mockRows[rowI] = {
         ...row,
         ...req.body,
