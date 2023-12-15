@@ -108,7 +108,8 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.visit("/admin/settings/authentication/api-keys");
     getApiKeysRows()
       .should("contain", "Development API Key")
-      .and("contain", "Production API Key");
+      .and("contain", "Production API Key")
+      .and("contain", "Personal API Key");
   });
 
   it("should allow creating an API key", () => {
@@ -165,24 +166,23 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.intercept("PUT", "/api/api-key/*", req => {
       const id = getRequestId(req);
       const rowI = mockRows.findIndex(row => row.id === id);
-      const row = mockRows[rowI];
-      const groupName = MOCK_GROUPS.find(
-        group => group.id === req.body.group_id,
-      )?.name;
       mockRows[rowI] = {
-        ...row,
+        ...mockRows[rowI],
         ...req.body,
-        group_name: groupName,
+        group_name: MOCK_GROUPS.find(group => group.id === req.body.group_id)
+          ?.name,
       };
       req.reply(200);
     }).as("saveKey");
     cy.visit("/admin/settings/authentication/api-keys");
     cy.wait("@fetchKeys");
+
     getApiKeysRows()
       .contains("Development API Key")
       .closest("tr")
       .icon("pencil")
       .click();
+
     cy.findByLabelText(/Key name/)
       .clear()
       .type("Different key name");
@@ -191,6 +191,7 @@ describe("scenarios > admin > settings > API keys", () => {
     cy.button("Save").click();
     cy.wait("@saveKey");
     cy.wait("@fetchKeys");
+
     getApiKeysRows()
       .should("not.contain", "Development API Key")
       .contains("Different key name")
