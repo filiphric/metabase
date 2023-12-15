@@ -418,6 +418,10 @@
         options           (merge {:lib/uuid       (str (random-uuid))
                                   :base-type      (:base-type metadata)
                                   :effective-type (column-metadata-effective-type metadata)}
+                                 ;; This one deliberately comes first so it will be overwritten by current-join-alias.
+                                 (when-let [source-alias (and (not inherited-column?)
+                                                              (:source-alias metadata))]
+                                   {:join-alias source-alias})
                                  (when-let [join-alias (lib.join.util/current-join-alias metadata)]
                                    {:join-alias join-alias})
                                  (when-let [temporal-unit (::temporal-unit metadata)]
