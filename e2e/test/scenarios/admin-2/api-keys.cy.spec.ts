@@ -233,8 +233,10 @@ describe("scenarios > admin > settings > API keys", () => {
       .findByText("Personal API Key")
       .closest("tr")
       .icon("link")
-      .trigger("mouseover") // FIXME: this simulated hover event doesn’t trigger the tooltip
-      .click();
+      .as("apiKeysLink")
+      .realHover();
+    cy.findByRole("tooltip").should("contain", "Manage API keys");
+    cy.get("@apiKeysLink").click();
     cy.url().should("match", /\/admin\/settings\/authentication\/api-keys$/);
   });
 
